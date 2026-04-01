@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f3f6f9;
+  --surface: #ffffff;
+  --surface-alt: #eef3f8;
+  --border: #d7e0ea;
+  --border-strong: #b7c6d9;
+  --foreground: #16212f;
+  --muted: #5d7086;
+  --primary: #0a66c2;
+  --primary-soft: #dcecff;
+  --success: #0a8f5b;
+  --warning: #b07400;
+  --danger: #bf2f2f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(10, 102, 194, 0.12), transparent 34%),
+    linear-gradient(180deg, #f7f9fb 0%, var(--background) 100%);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), "Avenir Next", "PingFang SC", sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.card-surface {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--border);
+  box-shadow: 0 18px 40px rgba(17, 38, 63, 0.06);
+}
+
+.soft-ring {
+  box-shadow: 0 0 0 4px rgba(10, 102, 194, 0.12);
+}

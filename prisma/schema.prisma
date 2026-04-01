@@ -1,0 +1,346 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum GradeLevel {
+  G9
+  G10
+  G11
+  G12
+}
+
+enum CourseSystem {
+  AP
+  AL
+  GENERAL
+}
+
+enum Visibility {
+  PUBLIC_ONLY
+  PUBLIC_AND_TEACHER
+}
+
+enum TargetType {
+  TEACHER
+  COURSE
+}
+
+enum InteractionKind {
+  COMMENT
+  QUESTION
+}
+
+enum ModerationAction {
+  REMOVE
+  HIDE
+  WARN
+  VERIFY_TEACHER
+  CHANGE_ROLE
+}
+
+enum CourseRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id                    String             @id @default(cuid())
+  email                 String             @unique
+  passwordHash          String
+  role                  UserRole
+  language              String             @default("en")
+  isTeacherVerified     Boolean            @default(false)
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  studentProfile        StudentProfile?
+  teacherProfile        TeacherProfile?
+  comments              Comment[]
+  commentReplies        CommentReply[]
+  questions             Question[]
+  questionReplies       QuestionReply[]
+  ratings               Rating[]
+  favorites             Favorite[]
+  commentLikes          CommentLike[]
+  commentReplyLikes     CommentReplyLike[]
+  questionLikes         QuestionLike[]
+  questionReplyLikes    QuestionReplyLike[]
+  notifications         Notification[]
+  moderationLogs        ModerationLog[]    @relation("ModeratorLogs")
+  courseRequests        CourseRequest[]
+}
+
+model StudentProfile {
+  id              String               @id @default(cuid())
+  userId          String               @unique
+  accountName     String               @unique
+  privacyNoticeAt DateTime?
+  gradeLevel      GradeLevel
+  courseSystem    CourseSystem
+  bio             String?
+  avatarUrl       String?
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enrollments     StudentCourseRecord[]
+}
+
+model TeacherProfile {
+  id               String         @id @default(cuid())
+  userId           String         @unique
+  displayName      String
+  department       String
+  subjectArea      String
+  shortBio         String?
+  teachingStyle    String?
+  avatarUrl        String?
+  officeHours      String?
+  courseHighlights String?
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseLinks      TeacherCourse[]
+  comments         Comment[]
+  questions        Question[]
+  ratings          Rating[]
+  favorites        Favorite[]
+}
+
+model Course {
+  id             String               @id @default(cuid())
+  slug           String               @unique
+  code           String               @unique
+  name           String
+  subject        String
+  description    String
+  gradeLevels    GradeLevel[]
+  system         CourseSystem
+  prerequisites  String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  teacherLinks   TeacherCourse[]
+  enrollments    StudentCourseRecord[]
+  comments       Comment[]
+  questions      Question[]
+  ratings        Rating[]
+  favorites      Favorite[]
+}
+
+model TeacherCourse {
+  id         String         @id @default(cuid())
+  teacherId  String
+  courseId   String
+  canEdit    Boolean        @default(true)
+  teacher    TeacherProfile @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  course     Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, courseId])
+}
+
+model StudentCourseRecord {
+  id         String         @id @default(cuid())
+  profileId  String
+  courseId   String
+  gradeLevel GradeLevel
+  profile    StudentProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  course     Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, courseId, gradeLevel])
+}
+
+model Comment {
+  id              String            @id @default(cuid())
+  authorId        String?
+  guestName       String?
+  guestKey        String?
+  targetType      TargetType
+  teacherProfileId String?
+  courseId        String?
+  title           String?
+  body            String
+  visibility      Visibility        @default(PUBLIC_ONLY)
+  isAnonymous     Boolean           @default(true)
+  isReported      Boolean           @default(false)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  author          User?             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  teacherProfile  TeacherProfile?   @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
+  course          Course?           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  replies         CommentReply[]
+  likes           CommentLike[]
+  ratings         Rating[]
+}
+
+model CommentReply {
+  id         String   @id @default(cuid())
+  commentId  String
+  authorId   String
+  body       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  comment    Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes      CommentReplyLike[]
+}
+
+model Question {
+  id               String          @id @default(cuid())
+  authorId         String?
+  guestName        String?
+  guestKey         String?
+  targetType       TargetType
+  teacherProfileId String?
+  courseId         String?
+  title            String
+  body             String
+  isAnswered       Boolean         @default(false)
+  isAnonymous      Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  author           User?           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  teacherProfile   TeacherProfile? @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
+  course           Course?         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  replies          QuestionReply[]
+  likes            QuestionLike[]
+}
+
+model QuestionReply {
+  id          String   @id @default(cuid())
+  questionId  String
+  authorId    String
+  body        String
+  isAccepted  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  question    Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes       QuestionReplyLike[]
+}
+
+model Rating {
+  id               String          @id @default(cuid())
+  authorId         String?
+  guestKey         String?
+  targetType       TargetType
+  teacherProfileId String?
+  courseId         String?
+  commentId        String?
+  targetKey        String
+  dimension        String
+  score            Int
+  isTeacherSelf    Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+  author           User?           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  teacherProfile   TeacherProfile? @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
+  course           Course?         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  comment          Comment?        @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([targetType, dimension])
+  @@unique([authorId, targetKey, dimension, isTeacherSelf])
+  @@unique([guestKey, targetKey, dimension, isTeacherSelf])
+}
+
+model Favorite {
+  id               String          @id @default(cuid())
+  userId           String
+  targetType       TargetType
+  teacherProfileId String?
+  courseId         String?
+  targetKey        String
+  createdAt        DateTime        @default(now())
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teacherProfile   TeacherProfile? @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
+  course           Course?         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([userId, targetType])
+  @@unique([userId, targetKey])
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  userId    String
+  commentId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+}
+
+model QuestionLike {
+  id         String   @id @default(cuid())
+  userId     String
+  questionId String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+}
+
+model CommentReplyLike {
+  id             String       @id @default(cuid())
+  userId         String
+  commentReplyId String
+  createdAt      DateTime     @default(now())
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  commentReply    CommentReply @relation(fields: [commentReplyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentReplyId])
+}
+
+model QuestionReplyLike {
+  id              String        @id @default(cuid())
+  userId          String
+  questionReplyId String
+  createdAt       DateTime      @default(now())
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questionReply   QuestionReply @relation(fields: [questionReplyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionReplyId])
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  title      String
+  body       String
+  href       String?
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ModerationLog {
+  id          String           @id @default(cuid())
+  moderatorId String
+  action      ModerationAction
+  targetType  InteractionKind?
+  targetId    String?
+  details     String
+  createdAt   DateTime         @default(now())
+  moderator   User             @relation("ModeratorLogs", fields: [moderatorId], references: [id], onDelete: Cascade)
+}
+
+model CourseRequest {
+  id          String              @id @default(cuid())
+  requesterId String?
+  requesterName String?
+  requesterEmail String?
+  name        String
+  subject     String
+  system      CourseSystem?
+  gradeLevels GradeLevel[]
+  notes       String?
+  status      CourseRequestStatus @default(PENDING)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  requester   User?               @relation(fields: [requesterId], references: [id], onDelete: Cascade)
+}

@@ -103,8 +103,3 @@ WLSelect is a production-style Next.js scaffold for a bilingual school community
 
 Demo users, teachers, courses, comments, questions, ratings, favorites, and notifications are inserted by [prisma/seed.ts](/Users/qyz123123/Documents/WLSelect/prisma/seed.ts).
 
-## Demo credentials
-
-- Student: `maya@wlselect.edu` / `Password123!`
-- Teacher: `reyes@wlselect.edu` / `Password123!`
-- Admin: `admin@wlselect.edu` / `Password123!`

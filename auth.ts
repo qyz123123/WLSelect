@@ -2,13 +2,19 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { z } from "zod";
+import { UserRole } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 
-const credentialsSchema = z.object({
+const accountCredentialsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
-  expectedRole: z.enum(["student", "teacher", "admin"]).optional()
+  expectedRole: z.enum(["student", "admin"]).optional()
+});
+
+const teacherCredentialsSchema = z.object({
+  name: z.string().min(2).max(80),
+  expectedRole: z.literal("teacher")
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -21,12 +27,62 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: {
+        name: { label: "Name", type: "text" },
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
         expectedRole: { label: "Expected role", type: "text" }
       },
       authorize: async (rawCredentials) => {
-        const parsed = credentialsSchema.safeParse(rawCredentials);
+        const teacherCredentials = teacherCredentialsSchema.safeParse(rawCredentials);
+
+        if (teacherCredentials.success) {
+          const normalizedName = teacherCredentials.data.name.trim();
+
+          const matches = await prisma.user.findMany({
+            where: {
+              role: UserRole.TEACHER,
+              teacherProfile: {
+                is: {
+                  displayName: {
+                    equals: normalizedName,
+                    mode: "insensitive"
+                  }
+                }
+              }
+            },
+            include: {
+              studentProfile: true,
+              teacherProfile: true
+            }
+          });
+
+          if (matches.length !== 1) {
+            return null;
+          }
+
+          const user = matches[0];
+          const displayName =
+            user.teacherProfile?.displayName ??
+            user.studentProfile?.accountName ??
+            user.email;
+          const language = (user.language === "zh" ? "zh" : "en") as "en" | "zh";
+          const avatarUrl =
+            user.teacherProfile?.avatarUrl ??
+            user.studentProfile?.avatarUrl ??
+            `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(displayName)}`;
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: displayName,
+            image: avatarUrl,
+            role: "teacher" as const,
+            language,
+            teacherVerified: user.isTeacherVerified
+          };
+        }
+
+        const parsed = accountCredentialsSchema.safeParse(rawCredentials);
 
         if (!parsed.success) {
           return null;

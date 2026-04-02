@@ -12,8 +12,8 @@ import { buildTargetKeyFromUi } from "@/lib/targets";
 const schema = z.object({
   targetType: z.enum(["teacher", "course"]),
   targetId: z.string().min(1),
-  title: z.string().min(2).max(120),
-  body: z.string().min(8).max(4000),
+  title: z.string().trim().max(120).optional().default(""),
+  body: z.string().trim().min(2).max(4000),
   visibility: z.enum(["PUBLIC_ONLY", "PUBLIC_AND_TEACHER"]).default("PUBLIC_ONLY"),
   ratings: z
     .array(
@@ -68,6 +68,46 @@ export async function POST(request: Request) {
   const authorId = isAuthenticatedTeacher || isAuthenticatedStudent ? session!.user.id : null;
   const guestName = isGuestStudent ? parsed.data.guest!.guestName : null;
   const guestKey = isGuestStudent ? parsed.data.guest!.guestKey : null;
+  const trimmedBody = parsed.data.body.trim();
+  const title = parsed.data.title.trim() || trimmedBody.slice(0, 120) || "Comment";
+  const duplicateWindowStart = new Date(Date.now() - 10 * 60 * 1000);
+
+  const duplicateComment = await prisma.comment.findFirst({
+    where: {
+      targetType,
+      teacherProfileId: parsed.data.targetType === "teacher" ? parsed.data.targetId : null,
+      courseId: parsed.data.targetType === "course" ? parsed.data.targetId : null,
+      ...(authorId ? { authorId } : { guestKey: guestKey! }),
+      OR: [
+        {
+          body: {
+            equals: trimmedBody,
+            mode: "insensitive"
+          }
+        },
+        {
+          createdAt: {
+            gte: duplicateWindowStart
+          }
+        }
+      ]
+    },
+    select: {
+      id: true
+    }
+  });
+
+  if (duplicateComment) {
+    return NextResponse.json(
+      {
+        error:
+          parsed.data.targetType === "teacher"
+            ? "You already posted a similar comment on this teacher recently."
+            : "You already posted a similar comment on this course recently."
+      },
+      { status: 409 }
+    );
+  }
 
   const comment = await prisma.comment.create({
     data: {
@@ -77,8 +117,8 @@ export async function POST(request: Request) {
       targetType,
       teacherProfileId: parsed.data.targetType === "teacher" ? parsed.data.targetId : null,
       courseId: parsed.data.targetType === "course" ? parsed.data.targetId : null,
-      title: parsed.data.title,
-      body: parsed.data.body,
+      title,
+      body: trimmedBody,
       visibility: parsed.data.visibility as Visibility
     }
   });

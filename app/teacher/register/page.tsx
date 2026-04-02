@@ -1,14 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { Card } from "@/components/card";
 import { CourseMultiSelect } from "@/components/course-multi-select";
-import { useIdentity } from "@/components/identity-provider";
 import { useLocale } from "@/components/locale-provider";
+import { useViewer } from "@/components/viewer-provider";
 
 interface CourseItem {
   id: string;
@@ -19,19 +17,18 @@ interface CourseItem {
 
 export default function TeacherRegisterPage() {
   const { locale } = useLocale();
-  const { selectTeacher } = useIdentity();
+  const viewer = useViewer();
   const router = useRouter();
   const [courses, setCourses] = useState<CourseItem[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [requestingCourse, setRequestingCourse] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [requestMessage, setRequestMessage] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
-    password: "",
-    confirmPassword: "",
     department: "",
     subjectArea: "",
     shortBio: "",
@@ -41,10 +38,6 @@ export default function TeacherRegisterPage() {
     requestSubject: "",
     requestGradeLevels: ["G11", "G12"] as string[]
   });
-
-  useEffect(() => {
-    selectTeacher();
-  }, [selectTeacher]);
 
   useEffect(() => {
     let cancelled = false;
@@ -67,8 +60,8 @@ export default function TeacherRegisterPage() {
   }, []);
 
   async function registerTeacher() {
-    if (form.password !== form.confirmPassword) {
-      setError(locale === "zh" ? "两次输入的密码不一致。" : "Passwords do not match.");
+    if (!form.name.trim()) {
+      setError(locale === "zh" ? "请输入教师姓名。" : "Please enter the teacher name.");
       return;
     }
 
@@ -79,6 +72,7 @@ export default function TeacherRegisterPage() {
 
     setSubmitting(true);
     setError(null);
+    setSuccess(null);
 
     const response = await fetch("/api/signup", {
       method: "POST",
@@ -87,7 +81,6 @@ export default function TeacherRegisterPage() {
       },
       body: JSON.stringify({
         email: form.email,
-        password: form.password,
         role: "teacher",
         name: form.name,
         language: locale,
@@ -106,16 +99,27 @@ export default function TeacherRegisterPage() {
       return;
     }
 
-    await signIn("credentials", {
-      email: form.email,
-      password: form.password,
-      expectedRole: "teacher",
-      redirect: false
-    });
-
-    selectTeacher();
     setSubmitting(false);
-    router.push("/teacher/dashboard");
+    setSuccess(
+      locale === "zh"
+        ? viewer?.role === "student"
+          ? "教师已创建。你当前仍保持学生登录状态。"
+          : "教师已创建。当前访客/学生状态不会被切换。"
+        : viewer?.role === "student"
+          ? "Teacher created. Your current student session stays active."
+          : "Teacher created. Your current guest or student status stays unchanged."
+    );
+    setForm((current) => ({
+      ...current,
+      name: "",
+      email: "",
+      department: "",
+      subjectArea: "",
+      shortBio: "",
+      teachingStyle: "",
+      courseIds: []
+    }));
+    router.push("/teachers");
     router.refresh();
   }
 
@@ -164,14 +168,12 @@ export default function TeacherRegisterPage() {
         <h1 className="text-3xl font-semibold tracking-tight">{locale === "zh" ? "教师注册" : "Teacher registration"}</h1>
         <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
           {locale === "zh"
-            ? "教师必须使用邮箱注册，并从官方课程列表中选择授课课程。个人资料和课程资料可以稍后补充。"
-            : "Teachers must register with email and choose taught courses from the official list. Personal and course details can be completed later."}
+            ? "现在可以自由创建教师。邮箱为可选项，不需要密码，之后教师可直接通过姓名登录。"
+            : "Teachers can now be created freely. Email is optional, no password is required, and the teacher can log in later using the name."}
         </p>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <input value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} placeholder={locale === "zh" ? "姓名" : "Name"} className="rounded-2xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)]" />
-          <input type="email" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} placeholder="Email" className="rounded-2xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)]" />
-          <input type="password" value={form.password} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} placeholder="Password" className="rounded-2xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)]" />
-          <input type="password" value={form.confirmPassword} onChange={(event) => setForm((current) => ({ ...current, confirmPassword: event.target.value }))} placeholder={locale === "zh" ? "确认密码" : "Confirm password"} className="rounded-2xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)]" />
+          <input type="email" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} placeholder={locale === "zh" ? "邮箱（可选）" : "Email (optional)"} className="rounded-2xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)]" />
           <input value={form.department} onChange={(event) => setForm((current) => ({ ...current, department: event.target.value }))} placeholder={locale === "zh" ? "部门（可稍后填写）" : "Department (optional now)"} className="rounded-2xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)]" />
           <input value={form.subjectArea} onChange={(event) => setForm((current) => ({ ...current, subjectArea: event.target.value }))} placeholder={locale === "zh" ? "学科方向（可稍后填写）" : "Subject area (optional now)"} className="rounded-2xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)]" />
           <textarea value={form.shortBio} onChange={(event) => setForm((current) => ({ ...current, shortBio: event.target.value }))} rows={3} placeholder={locale === "zh" ? "个人简介（可稍后填写）" : "Short bio (optional now)"} className="rounded-3xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)] md:col-span-2" />
@@ -214,13 +216,11 @@ export default function TeacherRegisterPage() {
         </div>
 
         {error ? <div className="mt-5 text-sm text-[var(--danger)]">{error}</div> : null}
+        {success ? <div className="mt-5 text-sm text-[var(--success)]">{success}</div> : null}
         <div className="mt-6 flex flex-wrap gap-3">
           <button type="button" onClick={() => void registerTeacher()} className="rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white">
             {submitting ? (locale === "zh" ? "创建中..." : "Creating account...") : locale === "zh" ? "创建教师账号" : "Create teacher account"}
           </button>
-          <Link href="/teacher/login" className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-semibold">
-            {locale === "zh" ? "已有账号，去登录" : "Already registered? Log in"}
-          </Link>
         </div>
       </Card>
     </div>

@@ -27,7 +27,7 @@ export default function SignupPage() {
           <Link href="/teacher/register" className="rounded-[28px] border border-[var(--border)] bg-white p-6 transition hover:border-[var(--primary)] hover:bg-[var(--primary-soft)]">
             <div className="text-xl font-semibold">{locale === "zh" ? "教师注册" : "Teacher registration"}</div>
             <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-              {locale === "zh" ? "使用邮箱注册，并选择官方课程列表中的授课课程。" : "Register with email and choose taught courses from the official course list."}
+              {locale === "zh" ? "自由创建教师，邮箱可选，并选择官方课程列表中的授课课程。" : "Create a teacher freely, with optional email, and choose taught courses from the official course list."}
             </p>
           </Link>
         </div>

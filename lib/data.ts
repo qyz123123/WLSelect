@@ -47,6 +47,33 @@ function mapLocale(language: string) {
   return language === "zh" ? "zh" : "en";
 }
 
+function localizeNotification(locale: "en" | "zh", title: string, body: string) {
+  if (locale === "zh") {
+    if (title === "Your question received a new answer") {
+      return {
+        title: "你的问题收到了新回答",
+        body: "Dr. Sofia Reyes 在 AP Physics 1 中进行了回复。"
+      };
+    }
+
+    if (title === "Comment moderation reminder") {
+      return {
+        title: "评论审核提醒",
+        body: "发布前现在会先显示社区规范。"
+      };
+    }
+
+    if (title === "A teacher-visible comment was posted") {
+      return {
+        title: "收到一条教师可见评论",
+        body: "你的资料页出现了一条新的学生评价。"
+      };
+    }
+  }
+
+  return { title, body };
+}
+
 function mapTargetType(targetType: TargetType): "teacher" | "course" {
   return targetType === TargetType.TEACHER ? "teacher" : "course";
 }
@@ -116,6 +143,36 @@ function resolveContentAuthor({
   };
 }
 
+function mapCommentReply({
+  reply,
+  viewerHasLiked = false
+}: {
+  reply: {
+    id: string;
+    authorId: string | null;
+    guestName?: string | null;
+    body: string;
+    createdAt: Date;
+    author: UserWithProfiles | null;
+    _count: {
+      likes: number;
+    };
+  };
+  viewerHasLiked?: boolean;
+}) {
+  return {
+    id: reply.id,
+    authorId: reply.authorId ?? undefined,
+    authorName: reply.author ? resolveDisplayName(reply.author) : reply.guestName?.trim() || "Guest",
+    authorRole: reply.author ? mapRole(reply.author.role) : ("student" as const),
+    isGuest: !reply.author,
+    body: reply.body,
+    createdAt: reply.createdAt.toISOString(),
+    likes: reply._count.likes,
+    viewerHasLiked
+  };
+}
+
 function resolveAvatar(user: UserWithProfiles) {
   return user.teacherProfile?.avatarUrl ?? user.studentProfile?.avatarUrl ?? fallbackAvatar(resolveDisplayName(user));
 }
@@ -155,13 +212,13 @@ function mapRatings(
   }));
 }
 
-async function getFavoriteKeySet(viewerId?: string) {
-  if (!viewerId) {
+async function getFavoriteKeySet(viewerId?: string, guestKey?: string) {
+  if (!viewerId && !guestKey) {
     return new Set<string>();
   }
 
   const favorites = await prisma.favorite.findMany({
-    where: { userId: viewerId },
+    where: viewerId ? { userId: viewerId } : { guestKey },
     select: { targetKey: true }
   });
 
@@ -181,21 +238,19 @@ function canSeeComment(
   visibility: Visibility,
   viewer: AppUser | null,
   authorId: string | null,
-  teacherUserId: string | null
+  teacherUserId: string | null,
+  commentGuestKey: string | null,
+  viewerGuestKey?: string
 ) {
   if (visibility === "PUBLIC_ONLY") {
     return true;
   }
 
-  if (!viewer) {
-    return false;
+  if (viewer) {
+    return (authorId ? viewer.id === authorId : false) || viewer.id === teacherUserId;
   }
 
-  if (viewer.role === "admin") {
-    return true;
-  }
-
-  return (authorId ? viewer.id === authorId : false) || viewer.id === teacherUserId;
+  return Boolean(viewerGuestKey && commentGuestKey && viewerGuestKey === commentGuestKey);
 }
 
 export async function getCurrentUser(userId: string) {
@@ -250,8 +305,8 @@ export async function getTeachers(viewerId?: string) {
   }));
 }
 
-export async function getTeacherById(id: string, viewerId?: string) {
-  const favorites = await getFavoriteKeySet(viewerId);
+export async function getTeacherById(id: string, viewerId?: string, guestKey?: string) {
+  const favorites = await getFavoriteKeySet(viewerId, guestKey);
   const teacher = await prisma.teacherProfile.findUnique({
     where: { id },
     include: {
@@ -297,8 +352,8 @@ export async function getTeacherById(id: string, viewerId?: string) {
   } satisfies TeacherProfile;
 }
 
-export async function getCourses(viewerId?: string) {
-  const favorites = await getFavoriteKeySet(viewerId);
+export async function getCourses(viewerId?: string, guestKey?: string) {
+  const favorites = await getFavoriteKeySet(viewerId, guestKey);
   const courses = await prisma.course.findMany({
     include: {
       teacherLinks: {
@@ -338,8 +393,8 @@ export async function getCourses(viewerId?: string) {
   }));
 }
 
-export async function getCourseBySlug(slug: string, viewerId?: string) {
-  const favorites = await getFavoriteKeySet(viewerId);
+export async function getCourseBySlug(slug: string, viewerId?: string, guestKey?: string) {
+  const favorites = await getFavoriteKeySet(viewerId, guestKey);
   const course = await prisma.course.findUnique({
     where: { slug },
     include: {
@@ -386,7 +441,8 @@ export async function getCourseBySlug(slug: string, viewerId?: string) {
 export async function getCommentsForTarget(
   targetType: "teacher" | "course",
   targetId: string,
-  viewer: AppUser | null = null
+  viewer: AppUser | null = null,
+  viewerGuestKey?: string
 ) {
   const teacherUserId = targetType === "teacher" ? await getTeacherVisibleUserId(targetId) : null;
   const comments = await prisma.comment.findMany({
@@ -416,6 +472,12 @@ export async function getCommentsForTarget(
               userId: viewer.id
             }
           }
+        : viewerGuestKey
+          ? {
+              where: {
+                guestKey: viewerGuestKey
+              }
+            }
         : true,
       replies: {
         include: {
@@ -451,7 +513,7 @@ export async function getCommentsForTarget(
   });
 
   return comments
-    .filter((comment) => canSeeComment(comment.visibility, viewer, comment.authorId, teacherUserId))
+    .filter((comment) => canSeeComment(comment.visibility, viewer, comment.authorId, teacherUserId, comment.guestKey, viewerGuestKey))
     .map<Comment>((comment) => ({
       id: comment.id,
       targetType,
@@ -471,20 +533,11 @@ export async function getCommentsForTarget(
       body: comment.body,
       visibility: comment.visibility,
       likes: comment._count.likes,
-      viewerHasLiked: viewer ? comment.likes.length > 0 : false,
+      viewerHasLiked: comment.likes.length > 0,
       createdAt: comment.createdAt.toISOString(),
       ratings: mapRatings(comment.ratings),
-      canReply: Boolean(viewer),
-      replies: comment.replies.map((reply) => ({
-        id: reply.id,
-        authorId: reply.authorId,
-        authorName: resolveDisplayName(reply.author),
-        authorRole: mapRole(reply.author.role),
-        body: reply.body,
-        createdAt: reply.createdAt.toISOString(),
-        likes: reply._count.likes,
-        viewerHasLiked: viewer ? reply.likes.length > 0 : false
-      }))
+      canReply: Boolean(viewer || viewerGuestKey),
+      replies: comment.replies.map((reply) => mapCommentReply({ reply, viewerHasLiked: viewer ? reply.likes.length > 0 : false }))
     }));
 }
 
@@ -632,18 +685,25 @@ export async function getStudentProfile(userId: string) {
 }
 
 export async function getNotifications(userId: string) {
-  const notifications = await prisma.notification.findMany({
-    where: { userId },
-    orderBy: {
-      createdAt: "desc"
-    },
-    take: 6
-  });
+  const [user, notifications] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { language: true }
+    }),
+    prisma.notification.findMany({
+      where: { userId },
+      orderBy: {
+        createdAt: "desc"
+      },
+      take: 6
+    })
+  ]);
+
+  const locale = mapLocale(user?.language ?? "en");
 
   return notifications.map<NotificationItem>((notification) => ({
+    ...localizeNotification(locale, notification.title, notification.body),
     id: notification.id,
-    title: notification.title,
-    body: notification.body,
     href: notification.href ?? "/",
     read: notification.isRead
   }));
@@ -755,15 +815,7 @@ export async function getFeedItems(viewer: AppUser | null = null) {
         likes: comment._count.likes,
         createdAt: comment.createdAt.toISOString(),
         ratings: mapRatings(comment.ratings),
-        replies: comment.replies.map((reply) => ({
-          id: reply.id,
-          authorId: reply.authorId,
-          authorName: resolveDisplayName(reply.author),
-          authorRole: mapRole(reply.author.role),
-          body: reply.body,
-          createdAt: reply.createdAt.toISOString(),
-          likes: reply._count.likes
-        }))
+        replies: comment.replies.map((reply) => mapCommentReply({ reply }))
       }
     })),
     ...questions.map((question) => ({
@@ -859,15 +911,7 @@ export async function getUserComments(userId: string) {
     viewerHasLiked: viewer ? false : false,
     createdAt: comment.createdAt.toISOString(),
     ratings: mapRatings(comment.ratings),
-    replies: comment.replies.map((reply) => ({
-      id: reply.id,
-      authorId: reply.authorId,
-      authorName: resolveDisplayName(reply.author),
-      authorRole: mapRole(reply.author.role),
-      body: reply.body,
-      createdAt: reply.createdAt.toISOString(),
-      likes: reply._count.likes
-    }))
+    replies: comment.replies.map((reply) => mapCommentReply({ reply }))
   }));
 }
 
@@ -1120,15 +1164,7 @@ export async function searchAll(query: string) {
       likes: comment._count.likes,
       createdAt: comment.createdAt.toISOString(),
       ratings: mapRatings(comment.ratings),
-      replies: comment.replies.map((reply) => ({
-        id: reply.id,
-        authorId: reply.authorId,
-        authorName: resolveDisplayName(reply.author),
-        authorRole: mapRole(reply.author.role),
-        body: reply.body,
-        createdAt: reply.createdAt.toISOString(),
-        likes: reply._count.likes
-      }))
+      replies: comment.replies.map((reply) => mapCommentReply({ reply }))
     })),
     questions: questions.map<Question>((question) => ({
       id: question.id,
@@ -1259,6 +1295,11 @@ export async function getTeacherDashboardData(userId: string): Promise<TeacherDa
   const teacher = await prisma.teacherProfile.findUnique({
     where: { userId },
     include: {
+      user: {
+        select: {
+          language: true
+        }
+      },
       courseLinks: {
         include: {
           course: {
@@ -1285,6 +1326,8 @@ export async function getTeacherDashboardData(userId: string): Promise<TeacherDa
   if (!teacher) {
     return null;
   }
+
+  const locale = mapLocale(teacher.user.language);
 
   const pendingCourseRequests = await prisma.courseRequest.count({
     where: {
@@ -1315,8 +1358,8 @@ export async function getTeacherDashboardData(userId: string): Promise<TeacherDa
           {
             id: "teacher-profile",
             kind: "profile" as const,
-            title: "Please complete your personal profile.",
-            description: "Add your department, subject area, bio, and teaching style.",
+            title: locale === "zh" ? "请完善你的个人资料。" : "Please complete your personal profile.",
+            description: locale === "zh" ? "请补充部门、学科方向、简介和教学风格。" : "Add your department, subject area, bio, and teaching style.",
             href: "/me/profile"
           }
         ]
@@ -1324,8 +1367,8 @@ export async function getTeacherDashboardData(userId: string): Promise<TeacherDa
     ...incompleteCourseProfiles.map((course) => ({
       id: `course-${course.courseId}`,
       kind: "course-profile" as const,
-      title: `Complete the profile for ${course.courseName}.`,
-      description: "Students still need a full course description and prerequisites.",
+      title: locale === "zh" ? `完善 ${course.courseName} 的课程资料。` : `Complete the profile for ${course.courseName}.`,
+      description: locale === "zh" ? "学生仍然需要完整的课程描述和先修要求。" : "Students still need a full course description and prerequisites.",
       href: `/courses/${course.slug}#teacher-edit`
     })),
     ...(pendingCourseRequests > 0
@@ -1333,8 +1376,11 @@ export async function getTeacherDashboardData(userId: string): Promise<TeacherDa
           {
             id: "course-request",
             kind: "course-request" as const,
-            title: `You still have ${pendingCourseRequests} course request${pendingCourseRequests === 1 ? "" : "s"} pending.`,
-            description: "Track requested additions while waiting for review.",
+            title:
+              locale === "zh"
+                ? `你还有 ${pendingCourseRequests} 条课程申请待处理。`
+                : `You still have ${pendingCourseRequests} course request${pendingCourseRequests === 1 ? "" : "s"} pending.`,
+            description: locale === "zh" ? "审核期间可以继续跟踪你提交的课程申请。" : "Track requested additions while waiting for review.",
             href: "/teacher/dashboard"
           }
         ]

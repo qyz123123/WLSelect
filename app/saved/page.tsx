@@ -21,14 +21,15 @@ export default function SavedPage() {
   const profile = data?.profile;
   const teachers = teacherData.data?.items.filter((teacher) => profile?.savedTeacherIds.includes(teacher.id)) ?? [];
   const courses = courseData.data?.items.filter((course) => profile?.savedCourseIds.includes(course.id)) ?? [];
+  const displayError = error === "Unauthorized." ? "请先登录" : error;
 
   return (
     <div className="space-y-6">
       <Card>
-        <SectionHeading title={copy.saved} description="Starred teachers and courses stay collected here for quick comparison before final decisions." />
+        <SectionHeading title={copy.saved} description={copy.savedDescription} />
       </Card>
-      {loading ? <Card>Loading saved items...</Card> : null}
-      {error ? <Card>{error}</Card> : null}
+      {loading ? <Card>{copy.loadingSaved}</Card> : null}
+      {displayError ? <Card>{displayError}</Card> : null}
       <div className="space-y-6">
         <section className="space-y-4">
           <SectionHeading title={copy.savedTeachers} />
@@ -40,7 +41,7 @@ export default function SavedPage() {
         </section>
         <section className="space-y-4">
           <SectionHeading title={copy.savedCourses} />
-          <div className="grid gap-5 xl:grid-cols-2">
+          <div className="grid gap-5 2xl:grid-cols-2">
             {courses.map((course) => (
               <CourseCard key={course.id} course={course} />
             ))}

@@ -3,20 +3,18 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { auth } from "@/auth";
+import { guestIdentitySchema } from "@/lib/guest";
 import { prisma } from "@/lib/prisma";
 import { buildTargetKeyFromUi } from "@/lib/targets";
 
 const schema = z.object({
   targetType: z.enum(["teacher", "course"]),
-  targetId: z.string().min(1)
+  targetId: z.string().min(1),
+  guest: guestIdentitySchema.optional()
 });
 
 export async function POST(request: Request) {
   const session = await auth();
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
 
   const body = await request.json();
   const parsed = schema.safeParse(body);
@@ -25,24 +23,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid favorite payload." }, { status: 400 });
   }
 
+  const userId = session?.user?.id ?? null;
+  const guestKey = userId ? null : parsed.data.guest?.guestKey ?? null;
+
+  if (!userId && !guestKey) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   const targetKey = buildTargetKeyFromUi(parsed.data.targetType, parsed.data.targetId);
-  const existing = await prisma.favorite.findUnique({
-    where: {
-      userId_targetKey: {
-        userId: session.user.id,
-        targetKey
-      }
-    }
+  const existing = await prisma.favorite.findFirst({
+    where: userId
+      ? {
+          userId,
+          targetKey
+        }
+      : {
+          guestKey: guestKey!,
+          targetKey
+        }
   });
 
   if (existing) {
     await prisma.favorite.delete({
-      where: {
-        userId_targetKey: {
-          userId: session.user.id,
-          targetKey
-        }
-      }
+      where: { id: existing.id }
     });
 
     return NextResponse.json({ ok: true, active: false });
@@ -50,7 +53,8 @@ export async function POST(request: Request) {
 
   await prisma.favorite.create({
     data: {
-      userId: session.user.id,
+      userId: userId ?? undefined,
+      guestKey: guestKey ?? undefined,
       targetType: parsed.data.targetType === "teacher" ? TargetType.TEACHER : TargetType.COURSE,
       teacherProfileId: parsed.data.targetType === "teacher" ? parsed.data.targetId : null,
       courseId: parsed.data.targetType === "course" ? parsed.data.targetId : null,

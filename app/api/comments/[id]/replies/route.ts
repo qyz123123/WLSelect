@@ -3,19 +3,17 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { auth } from "@/auth";
+import { ensureGuestNameAvailable, guestIdentitySchema } from "@/lib/guest";
 import { prisma } from "@/lib/prisma";
 import { getTargetDetailPath } from "@/lib/route-paths";
 
 const schema = z.object({
-  body: z.string().min(2).max(2000)
+  body: z.string().min(2).max(2000),
+  guest: guestIdentitySchema.optional()
 });
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
 
   const body = await request.json();
   const parsed = schema.safeParse(body);
@@ -24,24 +22,49 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Invalid reply." }, { status: 400 });
   }
 
+  const isAuthenticated = Boolean(session?.user?.id);
+  const isGuest = !isAuthenticated && Boolean(parsed.data.guest);
+
+  if (!isAuthenticated && !isGuest) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  if (isGuest && parsed.data.guest) {
+    try {
+      await ensureGuestNameAvailable(parsed.data.guest.guestName);
+    } catch (error) {
+      return NextResponse.json({ error: error instanceof Error ? error.message : "Invalid guest name." }, { status: 409 });
+    }
+  }
+
   const { id } = await params;
   const reply = await prisma.commentReply.create({
     data: {
       commentId: id,
-      authorId: session.user.id,
+      authorId: isAuthenticated ? session!.user.id : undefined,
+      guestName: isGuest ? parsed.data.guest!.guestName : undefined,
+      guestKey: isGuest ? parsed.data.guest!.guestKey : undefined,
       body: parsed.data.body
-    },
-    include: {
-      comment: true
+    }
+  });
+
+  const comment = await prisma.comment.findUnique({
+    where: { id: reply.commentId },
+    select: {
+      targetType: true,
+      teacherProfileId: true,
+      courseId: true
     }
   });
 
   revalidatePath("/");
-  const detailPath = await getTargetDetailPath({
-    targetType: reply.comment.targetType,
-    teacherProfileId: reply.comment.teacherProfileId,
-    courseId: reply.comment.courseId
-  });
+  const detailPath = comment
+    ? await getTargetDetailPath({
+        targetType: comment.targetType,
+        teacherProfileId: comment.teacherProfileId,
+        courseId: comment.courseId
+      })
+    : null;
   if (detailPath) {
     revalidatePath(detailPath);
   }

@@ -2,10 +2,13 @@ import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
 
 import { Card } from "@/components/card";
+import { useLocale } from "@/components/locale-provider";
 import { RatingSummary } from "@/components/rating-summary";
 import { TeacherProfile } from "@/lib/types";
 
 export function TeacherCard({ teacher }: { teacher: TeacherProfile }) {
+  const { copy } = useLocale();
+
   return (
     <Card className="overflow-hidden">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
@@ -34,7 +37,7 @@ export function TeacherCard({ teacher }: { teacher: TeacherProfile }) {
             href={`/teachers/${teacher.id}`}
             className="mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white"
           >
-            View profile
+            {copy.viewProfile}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

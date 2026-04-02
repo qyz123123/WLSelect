@@ -2,6 +2,7 @@
 
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
+import { isGuestNameAllowed } from "@/lib/guest-name";
 import { AppUser, IdentityState } from "@/lib/types";
 
 const STORAGE_KEY = "wlselect-identity";
@@ -62,11 +63,21 @@ export function IdentityProvider({
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as IdentityState;
+        const guestDisplayName =
+          parsed.guestDisplayName && isGuestNameAllowed(parsed.guestDisplayName)
+            ? parsed.guestDisplayName
+            : undefined;
+
         setIdentity({
           selectedRole: parsed.selectedRole ?? null,
-          status: parsed.status ?? null,
-          guestDisplayName: parsed.guestDisplayName,
-          guestKey: parsed.guestKey
+          status:
+            parsed.selectedRole === "student"
+              ? guestDisplayName
+                ? "student-guest"
+                : "student-browser"
+              : parsed.status ?? null,
+          guestDisplayName,
+          guestKey: guestDisplayName ? parsed.guestKey : undefined
         });
       } catch {
         window.localStorage.removeItem(STORAGE_KEY);

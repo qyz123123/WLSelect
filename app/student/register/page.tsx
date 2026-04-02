@@ -88,14 +88,14 @@ export default function StudentRegisterPage() {
             type="email"
             value={form.email}
             onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
-            placeholder="Email"
+            placeholder={locale === "zh" ? "邮箱" : "Email"}
             className="rounded-2xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)] md:col-span-2"
           />
           <input
             type="password"
             value={form.password}
             onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-            placeholder="Password"
+            placeholder={locale === "zh" ? "密码" : "Password"}
             className="rounded-2xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)]"
           />
           <input

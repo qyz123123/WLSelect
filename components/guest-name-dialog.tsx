@@ -69,7 +69,7 @@ export function GuestNameDialog({
         <input
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder={locale === "zh" ? "例如：游客4821" : "For example: 游客4821"}
+          placeholder={locale === "zh" ? "例如：游客4821" : "For example: Guest4821"}
           className="mt-5 w-full rounded-2xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)]"
         />
         {loading ? <div className="mt-3 text-sm text-[var(--muted)]">{locale === "zh" ? "生成建议中..." : "Preparing a suggestion..."}</div> : null}

@@ -11,7 +11,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { useLocale } from "@/components/locale-provider";
 import { AppUser } from "@/lib/types";
 
-const bypassPaths = ["/login", "/signup", "/teacher/login", "/teacher/register", "/student/login", "/student/register"];
+const bypassPaths = ["/login", "/signup", "/teacher/login", "/teacher/register", "/student/login", "/student/register", "/admin/login"];
 
 export function IdentityGate({
   children,
@@ -66,8 +66,8 @@ export function IdentityGate({
               <div className="mt-8 text-[2rem] font-semibold tracking-tight text-[var(--foreground)]">{copy.teacher}</div>
               <p className="mt-5 text-base leading-8 text-[var(--muted)]">
                 {locale === "zh"
-                  ? "用邮箱注册并管理你的教师资料、授课课程与通知。"
-                  : "Register with email and manage your teacher profile, taught courses, and dashboard reminders."}
+                  ? "可自由创建教师，并通过姓名登录来管理教师资料、授课课程与通知。"
+                  : "Create teachers freely, then use the name to sign in and manage teacher profile, taught courses, and notifications."}
               </p>
             </button>
             <button
@@ -100,24 +100,24 @@ export function IdentityGate({
           </div>
           <LanguageSwitcher />
         </div>
-        <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--primary-soft)] px-4 py-2 text-sm font-semibold text-[var(--primary)]">
-          <ArrowLeftRight className="h-4 w-4" />
-          {locale === "zh" ? "老师需要先登录" : "Teachers must sign in first"}
+          <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--primary-soft)] px-4 py-2 text-sm font-semibold text-[var(--primary)]">
+            <ArrowLeftRight className="h-4 w-4" />
+            {locale === "zh" ? "老师需要先登录" : "Teachers must sign in first"}
         </div>
         <h1 className="mt-5 text-3xl font-semibold tracking-tight">
           {locale === "zh" ? "老师需要先登录或注册" : "Teachers need to sign in or create an account first"}
         </h1>
         <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
           {locale === "zh"
-            ? "老师不能以游客身份进入。请使用邮箱完成注册，并从官方课程列表中选择授课课程。"
-            : "Teachers cannot continue as anonymous guests. Please sign in or register with email and choose taught courses from the official course list."}
+            ? "老师不能以游客身份进入。请先创建或登录教师，并从官方课程列表中选择授课课程。"
+            : "Teachers cannot continue as anonymous guests. Please create or sign in to a teacher account, then choose taught courses from the official course list."}
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/teacher/login" className="rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white">
             {locale === "zh" ? "老师登录" : "Teacher login"}
           </Link>
           <Link href="/teacher/register" className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-semibold">
-            {locale === "zh" ? "老师注册" : "Teacher registration"}
+            {locale === "zh" ? "教师注册" : "Teacher registration"}
           </Link>
           <button type="button" onClick={selectStudent} className="rounded-full border border-[var(--border)] px-5 py-3 text-sm font-semibold">
             {locale === "zh" ? "改为学生进入" : "Enter as student instead"}

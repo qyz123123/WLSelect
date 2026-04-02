@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Star } from "lucide-react";
 
 import { GuestNameDialog } from "@/components/guest-name-dialog";
 import { useIdentity } from "@/components/identity-provider";
@@ -26,10 +27,15 @@ export function RatingGrid({
   const { locale, copy } = useLocale();
   const { identity, enableGuestPosting } = useIdentity();
   const [items, setItems] = useState(ratings);
+  const [draftScores, setDraftScores] = useState<Record<string, number>>({});
+  const [draftMode, setDraftMode] = useState(false);
   const [submittingDimension, setSubmittingDimension] = useState<string | null>(null);
+  const [submittingBatch, setSubmittingBatch] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
   const [guestSuggestion, setGuestSuggestion] = useState(identity.guestDisplayName ?? "");
   const [guestLoading, setGuestLoading] = useState(false);
+  const [pendingStartRating, setPendingStartRating] = useState(false);
 
   useEffect(() => {
     setItems(ratings);
@@ -61,11 +67,28 @@ export function RatingGrid({
     };
   }, [guestDialogOpen, identity.guestDisplayName]);
 
+  useEffect(() => {
+    if (!pendingStartRating || !identity.guestDisplayName || !identity.guestKey) {
+      return;
+    }
+
+    setPendingStartRating(false);
+    setDraftMode(true);
+  }, [identity.guestDisplayName, identity.guestKey, pendingStartRating]);
+
   const viewerRatingRole = viewer?.role === "teacher" ? "teacher-self" : viewer?.role === "student" ? "student" : null;
-  const canGuestRate = !viewer && identity.selectedRole === "student" && targetType === "course" && Boolean(targetId);
-  const canRate = Boolean(
-    (viewer && viewer.role !== "admin" && targetType && targetId && viewerRatingRole) || canGuestRate
+  const canGuestRate = !viewer && identity.selectedRole === "student" && Boolean(targetType && targetId);
+  const isStudentRater = Boolean((viewer?.role === "student" && targetType && targetId) || canGuestRate);
+  const isTeacherSelfRater = Boolean(viewer?.role === "teacher" && targetType && targetId);
+  const canRate = Boolean((viewer && viewer.role !== "admin" && targetType && targetId && viewerRatingRole) || canGuestRate);
+  const submittedViewerRatings = items.filter((rating) =>
+    viewer?.role === "student"
+      ? rating.authorId === viewer.id && rating.role === "student"
+      : identity.guestKey
+        ? rating.guestKey === identity.guestKey && rating.role === "student"
+        : false
   );
+  const isStudentRatingLocked = isStudentRater && submittedViewerRatings.length > 0;
 
   function formatAverage(score: number) {
     return Number.isInteger(score) ? score.toFixed(0) : score.toFixed(1);
@@ -120,11 +143,12 @@ export function RatingGrid({
     }
 
     enableGuestPosting(name);
+    setError(null);
     setGuestDialogOpen(false);
   }
 
-  async function submitRating(dimension: string, score: number) {
-    if (!canRate || !targetType || !targetId) {
+  function startStudentRating() {
+    if (!isStudentRater || isStudentRatingLocked) {
       return;
     }
 
@@ -133,7 +157,17 @@ export function RatingGrid({
     }
 
     if (!viewer && (!identity.guestDisplayName || !identity.guestKey)) {
+      setPendingStartRating(true);
       setGuestDialogOpen(true);
+      return;
+    }
+
+    setError(null);
+    setDraftMode(true);
+  }
+
+  async function submitTeacherRating(dimension: string, score: number) {
+    if (!isTeacherSelfRater || !targetType || !targetId || !viewer) {
       return;
     }
 
@@ -153,14 +187,7 @@ export function RatingGrid({
           targetType,
           targetId,
           dimension,
-          score,
-          guest:
-            !viewer && identity.guestDisplayName && identity.guestKey
-              ? {
-                  guestName: identity.guestDisplayName,
-                  guestKey: identity.guestKey
-                }
-              : undefined
+          score
         })
       });
 
@@ -176,8 +203,95 @@ export function RatingGrid({
     }
   }
 
+  async function submitStudentRatings() {
+    if (!isStudentRater || !targetType || !targetId || isStudentRatingLocked) {
+      return;
+    }
+
+    if (!viewer && (!identity.guestDisplayName || !identity.guestKey)) {
+      setPendingStartRating(true);
+      setGuestDialogOpen(true);
+      return;
+    }
+
+    const missingDimension = dimensions.find((dimension) => !draftScores[dimension.key]);
+    if (missingDimension) {
+      setError(copy.selectAllRatings);
+      return;
+    }
+
+    setSubmittingBatch(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/ratings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          targetType,
+          targetId,
+          ratings: dimensions.map((dimension) => ({
+            dimension: dimension.key,
+            score: draftScores[dimension.key]
+          })),
+          guest:
+            !viewer && identity.guestDisplayName && identity.guestKey
+              ? {
+                  guestName: identity.guestDisplayName,
+                  guestKey: identity.guestKey
+                }
+              : undefined
+        })
+      });
+
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setError(payload?.error ?? (locale === "zh" ? "评分发布失败，请重试。" : "Unable to post ratings. Please try again."));
+        return;
+      }
+
+      const postedRatings = (payload?.ratings as RatingValue[] | undefined) ?? [];
+      const next = [
+        ...items.filter((rating) =>
+          viewer?.role === "student"
+            ? !(rating.authorId === viewer.id && rating.role === "student")
+            : identity.guestKey
+              ? !(rating.guestKey === identity.guestKey && rating.role === "student")
+              : true
+        ),
+        ...postedRatings
+      ];
+
+      setItems(next);
+      onRatingsChange?.(next);
+      setDraftMode(false);
+      setDraftScores({});
+    } finally {
+      setSubmittingBatch(false);
+    }
+  }
+
   return (
     <div className="grid gap-3 md:grid-cols-2">
+      {isStudentRater ? (
+        <div className="md:col-span-2">
+          {!draftMode && !isStudentRatingLocked ? (
+            <button
+              type="button"
+              onClick={startStudentRating}
+              className="rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white"
+            >
+              {copy.iWantToRate}
+            </button>
+          ) : null}
+          {draftMode ? <div className="mt-2 text-sm text-[var(--muted)]">{copy.pickStarsThenPost}</div> : null}
+          {isStudentRatingLocked ? <div className="text-sm text-[var(--muted)]">{copy.ratingsLocked}</div> : null}
+          {error ? <div className="mt-2 text-sm text-[var(--danger)]">{error}</div> : null}
+        </div>
+      ) : null}
       {dimensions.map((dimension) => {
         const relevantRatings = items.filter((rating) => rating.dimension === dimension.key);
         const values = relevantRatings.map((rating) => rating.score);
@@ -187,7 +301,9 @@ export function RatingGrid({
           : identity.guestKey
             ? relevantRatings.find((rating) => rating.guestKey === identity.guestKey && rating.role === "student")?.score
             : undefined;
-        const isSubmitting = submittingDimension === dimension.key;
+        const draftScore = draftScores[dimension.key];
+        const activeScore = isStudentRater ? (draftMode ? draftScore : viewerScore) : viewerScore;
+        const isSubmitting = submittingDimension === dimension.key || submittingBatch;
 
         return (
           <div key={dimension.key} className="rounded-[28px] border border-[var(--border)] bg-white p-5">
@@ -218,34 +334,45 @@ export function RatingGrid({
                 />
               ))}
             </div>
-            <div className="mt-4 grid grid-cols-5 gap-2">
+            <div className="mt-4 grid max-w-[220px] grid-cols-5 gap-1.5">
               {[1, 2, 3, 4, 5].map((score) => (
                 <button
                   key={score}
                   type="button"
-                  disabled={!canRate || isSubmitting}
-                  onClick={() => void submitRating(dimension.key, score)}
+                  disabled={!canRate || isSubmitting || (isStudentRater ? (!draftMode || isStudentRatingLocked) : false)}
+                  onClick={() =>
+                    isStudentRater
+                      ? setDraftScores((current) => ({ ...current, [dimension.key]: score }))
+                      : void submitTeacherRating(dimension.key, score)
+                  }
                   className={cn(
-                    "rounded-2xl border px-0 py-2 text-sm font-semibold transition",
-                    viewerScore === score
-                      ? "border-[var(--primary)] bg-[var(--primary)] text-white"
-                      : "border-[var(--border)] bg-[var(--surface-alt)] text-[var(--foreground)] hover:border-[var(--primary)] hover:text-[var(--primary)]",
+                    "flex h-10 w-10 items-center justify-center rounded-full transition",
+                    activeScore && score <= activeScore ? "text-[var(--primary)]" : "text-slate-300",
                     (!canRate || isSubmitting) && "cursor-not-allowed opacity-60"
                   )}
+                  aria-label={`${dimension.label[locale]} ${score}/5`}
                 >
-                  {score}
+                  <Star className="h-6 w-6" fill={activeScore && score <= activeScore ? "currentColor" : "none"} />
                 </button>
               ))}
             </div>
             <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--muted)]">
               <span>
                 {canRate
-                  ? !viewer && targetType === "course"
+                  ? !viewer
                     ? locale === "zh"
-                      ? "游客和学生账号都可以评分"
-                      : "Guests and students can rate this course"
+                      ? targetType === "teacher"
+                        ? "游客和学生账号都可以给老师评分"
+                        : "游客和学生账号都可以给课程评分"
+                      : targetType === "teacher"
+                        ? "Guests and students can rate this teacher"
+                        : "Guests and students can rate this course"
                     : copy.tapToRate
-                  : copy.signInToRate}
+                  : !viewer
+                    ? locale === "zh"
+                      ? "请选择学生身份后评分"
+                      : "Choose the student entry path to rate"
+                    : copy.signInToRate}
               </span>
               {viewerScore ? (
                 <span>
@@ -253,10 +380,22 @@ export function RatingGrid({
                 </span>
               ) : null}
             </div>
-            {isSubmitting ? <div className="mt-2 text-xs text-[var(--muted)]">{locale === "zh" ? "保存中..." : "Saving..."}</div> : null}
+            {isSubmitting ? <div className="mt-2 text-xs text-[var(--muted)]">{copy.saving}</div> : null}
           </div>
         );
       })}
+      {isStudentRater && draftMode && !isStudentRatingLocked ? (
+        <div className="md:col-span-2 flex justify-end">
+          <button
+            type="button"
+            onClick={() => void submitStudentRatings()}
+            disabled={submittingBatch}
+            className="rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+          >
+            {copy.postAction}
+          </button>
+        </div>
+      ) : null}
       <GuestNameDialog
         open={guestDialogOpen}
         loading={guestLoading}

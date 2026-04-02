@@ -106,9 +106,10 @@ export interface TeacherDashboardSummary {
 
 export interface CommentReply {
   id: string;
-  authorId: string;
+  authorId?: string;
   authorName: string;
   authorRole: Role;
+  isGuest?: boolean;
   body: string;
   createdAt: string;
   likes: number;

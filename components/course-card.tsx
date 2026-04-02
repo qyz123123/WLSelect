@@ -2,18 +2,21 @@ import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
 
 import { Card } from "@/components/card";
+import { useLocale } from "@/components/locale-provider";
+import { formatCourseSystem } from "@/lib/i18n";
 import { RatingSummary } from "@/components/rating-summary";
 import { Course } from "@/lib/types";
 
 export function CourseCard({ course }: { course: Course }) {
+  const { copy, locale } = useLocale();
+
   return (
-    <Card>
+    <Card className="w-full">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--primary)]">{course.code}</div>
-          <h3 className="mt-2 text-lg font-semibold tracking-tight">{course.name}</h3>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            {course.subject} • {course.system} • {course.gradeLevels.join(", ")}
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-semibold tracking-tight">{course.name}</h3>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            {course.subject} • {formatCourseSystem(locale, course.system)} • {course.gradeLevels.join(", ")}
           </p>
         </div>
         <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-700">
@@ -29,7 +32,7 @@ export function CourseCard({ course }: { course: Course }) {
         href={`/courses/${course.slug}`}
         className="mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white"
       >
-        Explore course
+        {copy.exploreCourse}
         <ArrowRight className="h-4 w-4" />
       </Link>
     </Card>

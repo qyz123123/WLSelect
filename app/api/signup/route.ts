@@ -1,9 +1,34 @@
+import { randomUUID } from "crypto";
 import { hash } from "bcryptjs";
 import { CourseSystem, GradeLevel, UserRole } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
+
+function optionalEmailSchema() {
+  return z.preprocess(
+    (value) => {
+      if (typeof value !== "string") {
+        return value;
+      }
+
+      const normalized = value.trim();
+      return normalized.length > 0 ? normalized : undefined;
+    },
+    z.string().email().optional()
+  );
+}
+
+function buildTeacherPlaceholderEmail(name: string) {
+  const slug = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ".")
+    .replace(/^\.+|\.+$/g, "") || "teacher";
+
+  return `${slug}.${randomUUID()}@wlselect.local`;
+}
 
 const studentSignupSchema = z.object({
   email: z.string().email(),
@@ -16,8 +41,7 @@ const studentSignupSchema = z.object({
 });
 
 const teacherSignupSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
+  email: optionalEmailSchema(),
   role: z.literal("teacher"),
   name: z.string().min(2).max(80),
   language: z.enum(["en", "zh"]).default("en"),
@@ -38,15 +62,33 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid signup data." }, { status: 400 });
   }
 
+  if (parsed.data.role === "teacher") {
+    const existingTeacherName = await prisma.teacherProfile.findFirst({
+      where: {
+        displayName: {
+          equals: parsed.data.name.trim(),
+          mode: "insensitive"
+        }
+      },
+      select: { id: true }
+    });
+
+    if (existingTeacherName) {
+      return NextResponse.json({ error: "Teacher name already in use." }, { status: 409 });
+    }
+  }
+
+  const email = parsed.data.role === "teacher" ? parsed.data.email ?? buildTeacherPlaceholderEmail(parsed.data.name) : parsed.data.email;
+
   const exists = await prisma.user.findUnique({
-    where: { email: parsed.data.email }
+    where: { email }
   });
 
   if (exists) {
     return NextResponse.json({ error: "Email already in use." }, { status: 409 });
   }
 
-  const passwordHash = await hash(parsed.data.password, 12);
+  const passwordHash = parsed.data.role === "student" ? await hash(parsed.data.password, 12) : "__teacher_name_login__";
   const teacherCourseIds = parsed.data.role === "teacher" ? [...new Set(parsed.data.courseIds)] : [];
 
   if (parsed.data.role === "teacher") {
@@ -71,7 +113,7 @@ export async function POST(request: Request) {
   try {
     const user = await prisma.user.create({
       data: {
-        email: parsed.data.email,
+        email,
         passwordHash,
         role: parsed.data.role === "teacher" ? UserRole.TEACHER : UserRole.STUDENT,
         language: parsed.data.language,
@@ -92,17 +134,19 @@ export async function POST(request: Request) {
           parsed.data.role === "teacher"
             ? {
                 create: {
-                  displayName: parsed.data.name,
+                  displayName: parsed.data.name.trim(),
                   department: parsed.data.department?.trim() || "Unassigned",
                   subjectArea: parsed.data.subjectArea?.trim() || "Unassigned",
                   shortBio: parsed.data.shortBio?.trim() ?? "",
                   teachingStyle: parsed.data.teachingStyle?.trim() ?? "",
                   avatarUrl: null,
-                  courseLinks: {
-                    create: teacherCourseIds.map((courseId) => ({
-                      courseId
-                    }))
-                  }
+                  courseLinks: teacherCourseIds.length
+                    ? {
+                        create: teacherCourseIds.map((courseId) => ({
+                          courseId
+                        }))
+                      }
+                    : undefined
                 }
               }
             : undefined

@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { ArrowUpRight, Eye, Lock, MessageSquareText, ThumbsUp } from "lucide-react";
 
 import { Card } from "@/components/card";
+import { GuestNameDialog } from "@/components/guest-name-dialog";
+import { useIdentity } from "@/components/identity-provider";
 import { useLocale } from "@/components/locale-provider";
 import { Comment } from "@/lib/types";
 
@@ -18,16 +20,104 @@ export function CommentThread({
   canReply?: boolean;
 }) {
   const { copy, locale } = useLocale();
+  const { identity, enableGuestPosting } = useIdentity();
   const [items, setItems] = useState(comments);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
+  const [guestDialogOpen, setGuestDialogOpen] = useState(false);
+  const [guestSuggestion, setGuestSuggestion] = useState(identity.guestDisplayName ?? "");
+  const [guestLoading, setGuestLoading] = useState(false);
+  const [pendingReplyCommentId, setPendingReplyCommentId] = useState<string | null>(null);
+  const [pendingLikeCommentId, setPendingLikeCommentId] = useState<string | null>(null);
 
   useEffect(() => {
     setItems(comments);
   }, [comments]);
 
+  useEffect(() => {
+    if (!guestDialogOpen || identity.guestDisplayName) {
+      return;
+    }
+
+    let cancelled = false;
+    setGuestLoading(true);
+
+    fetch("/api/guest/display-name")
+      .then((response) => response.json())
+      .then((payload) => {
+        if (!cancelled) {
+          setGuestSuggestion(payload?.suggestion ?? "");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setGuestLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [guestDialogOpen, identity.guestDisplayName]);
+
+  useEffect(() => {
+    if (!identity.guestDisplayName || !identity.guestKey) {
+      return;
+    }
+
+    if (pendingReplyCommentId) {
+      const commentId = pendingReplyCommentId;
+      setPendingReplyCommentId(null);
+      void submitReply(commentId);
+    }
+
+    if (pendingLikeCommentId) {
+      const commentId = pendingLikeCommentId;
+      setPendingLikeCommentId(null);
+      void toggleLike(commentId);
+    }
+  }, [identity.guestDisplayName, identity.guestKey, pendingLikeCommentId, pendingReplyCommentId]);
+
+  async function saveGuestIdentity(name: string) {
+    const response = await fetch("/api/guest/display-name", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name })
+    });
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      throw new Error(payload?.error ?? (locale === "zh" ? "游客名称不可用。" : "That guest name is unavailable."));
+    }
+
+    enableGuestPosting(name);
+    setGuestDialogOpen(false);
+  }
+
   async function toggleLike(commentId: string) {
+    const guestPayload =
+      identity.selectedRole === "student" && identity.guestDisplayName && identity.guestKey
+        ? {
+            guestName: identity.guestDisplayName,
+            guestKey: identity.guestKey
+          }
+        : undefined;
+
+    if (!canReply && identity.selectedRole === "student" && !guestPayload) {
+      setPendingLikeCommentId(commentId);
+      setGuestDialogOpen(true);
+      return;
+    }
+
     const response = await fetch(`/api/comments/${commentId}/like`, {
-      method: "POST"
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        guest: !canReply ? guestPayload : undefined
+      })
     });
 
     if (!response.ok) {
@@ -54,12 +144,33 @@ export function CommentThread({
       return;
     }
 
+    const canGuestReply = identity.selectedRole === "student";
+
+    if (!canReply && !canGuestReply) {
+      return;
+    }
+
+    if (!canReply && (!identity.guestDisplayName || !identity.guestKey)) {
+      setPendingReplyCommentId(commentId);
+      setGuestDialogOpen(true);
+      return;
+    }
+
     const response = await fetch(`/api/comments/${commentId}/replies`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ body })
+      body: JSON.stringify({
+        body,
+        guest:
+          !canReply && identity.guestDisplayName && identity.guestKey
+            ? {
+                guestName: identity.guestDisplayName,
+                guestKey: identity.guestKey
+              }
+            : undefined
+      })
     });
 
     if (!response.ok) {
@@ -84,19 +195,15 @@ export function CommentThread({
                 <div className="text-sm font-semibold">{comment.title}</div>
               )}
               <div className="mt-1 text-xs text-[var(--muted)]">
-                {comment.authorName} • {new Date(comment.createdAt).toLocaleDateString()}
+                {comment.authorName} • {new Date(comment.createdAt).toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US")}
               </div>
               {comment.targetHref ? (
                 <div className="mt-2 text-xs text-[var(--muted)]">
                   {comment.targetLabel
                     ? `${copy.overview}: ${comment.targetLabel}`
                     : comment.targetType === "teacher"
-                      ? locale === "zh"
-                        ? "教师页面"
-                        : "Teacher page"
-                      : locale === "zh"
-                        ? "课程页面"
-                        : "Course page"}
+                      ? copy.teacherPage
+                      : copy.coursePage}
                 </div>
               ) : null}
             </div>
@@ -117,7 +224,7 @@ export function CommentThread({
             </button>
             <span className="inline-flex items-center gap-2">
               <MessageSquareText className="h-4 w-4" />
-              {comment.replies.length} replies
+              {locale === "zh" ? `${comment.replies.length}${copy.replies}` : `${comment.replies.length} ${copy.replies}`}
             </span>
             {comment.targetHref ? (
               <Link
@@ -139,7 +246,7 @@ export function CommentThread({
               ))}
             </div>
           ) : null}
-          {canReply ? (
+          {canReply || identity.selectedRole === "student" ? (
             <div className="mt-4 rounded-3xl bg-[var(--surface-alt)] p-4">
               <textarea
                 rows={3}
@@ -150,7 +257,7 @@ export function CommentThread({
                     [comment.id]: event.target.value
                   }))
                 }
-                placeholder="Write a reply..."
+                placeholder={copy.writeReplyPlaceholder}
                 className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none"
               />
               <div className="mt-3 flex justify-end">
@@ -159,13 +266,20 @@ export function CommentThread({
                   onClick={() => void submitReply(comment.id)}
                   className="rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white"
                 >
-                  Reply
+                  {copy.reply}
                 </button>
               </div>
             </div>
           ) : null}
         </Card>
       ))}
+      <GuestNameDialog
+        open={guestDialogOpen}
+        loading={guestLoading}
+        initialValue={identity.guestDisplayName ?? guestSuggestion}
+        onClose={() => setGuestDialogOpen(false)}
+        onConfirm={saveGuestIdentity}
+      />
     </div>
   );
 }

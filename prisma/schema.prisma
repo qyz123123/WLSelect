@@ -181,12 +181,14 @@ model Comment {
 model CommentReply {
   id         String   @id @default(cuid())
   commentId  String
-  authorId   String
+  authorId   String?
+  guestName  String?
+  guestKey   String?
   body       String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   comment    Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author     User?    @relation(fields: [authorId], references: [id], onDelete: Cascade)
   likes      CommentReplyLike[]
 }
 
@@ -249,29 +251,34 @@ model Rating {
 
 model Favorite {
   id               String          @id @default(cuid())
-  userId           String
+  userId           String?
+  guestKey         String?
   targetType       TargetType
   teacherProfileId String?
   courseId         String?
   targetKey        String
   createdAt        DateTime        @default(now())
-  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
   teacherProfile   TeacherProfile? @relation(fields: [teacherProfileId], references: [id], onDelete: Cascade)
   course           Course?         @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([userId, targetType])
+  @@index([guestKey, targetType])
   @@unique([userId, targetKey])
+  @@unique([guestKey, targetKey])
 }
 
 model CommentLike {
   id        String   @id @default(cuid())
-  userId    String
+  userId    String?
+  guestKey  String?
   commentId String
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
   @@unique([userId, commentId])
+  @@unique([guestKey, commentId])
 }
 
 model QuestionLike {

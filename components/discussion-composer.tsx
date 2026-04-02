@@ -12,33 +12,30 @@ export function DiscussionComposer({
   targetType,
   targetId,
   viewer,
-  onMutated
+  onMutated,
+  successAnchorId = "comments-section",
+  onPosted
 }: {
   targetType: "teacher" | "course";
   targetId: string;
   viewer?: AppUser | null;
   onMutated?: () => void;
+  successAnchorId?: string;
+  onPosted?: () => void;
 }) {
   const { locale, copy } = useLocale();
   const { identity, enableGuestPosting } = useIdentity();
-  const [mode, setMode] = useState<"comment" | "question">("comment");
-  const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [visibility, setVisibility] = useState<"PUBLIC_ONLY" | "PUBLIC_AND_TEACHER">("PUBLIC_ONLY");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
   const [guestSuggestion, setGuestSuggestion] = useState(identity.guestDisplayName ?? "");
   const [guestLoading, setGuestLoading] = useState(false);
+  const [pendingSubmit, setPendingSubmit] = useState(false);
 
   const canComment = viewer?.role === "student" || viewer?.role === "teacher" || identity.selectedRole === "student";
-  const canAskQuestion = viewer?.role === "student" || identity.selectedRole === "student";
   const mustUseGuestIdentity = !viewer && identity.selectedRole === "student";
-
-  useEffect(() => {
-    if (viewer?.role === "teacher" && mode === "question") {
-      setMode("comment");
-    }
-  }, [mode, viewer?.role]);
 
   useEffect(() => {
     if (!guestDialogOpen || identity.guestDisplayName) {
@@ -66,14 +63,14 @@ export function DiscussionComposer({
     };
   }, [guestDialogOpen, identity.guestDisplayName]);
 
-  async function ensureGuestIdentity() {
-    if (identity.guestDisplayName && identity.guestKey) {
+  useEffect(() => {
+    if (!pendingSubmit || !identity.guestDisplayName || !identity.guestKey) {
       return;
     }
 
-    setGuestDialogOpen(true);
-    throw new Error("guest-name-required");
-  }
+    setPendingSubmit(false);
+    void submit();
+  }, [identity.guestDisplayName, identity.guestKey, pendingSubmit]);
 
   async function saveGuestIdentity(name: string) {
     const response = await fetch("/api/guest/display-name", {
@@ -90,76 +87,92 @@ export function DiscussionComposer({
     }
 
     enableGuestPosting(name);
+    setError(null);
     setGuestDialogOpen(false);
   }
 
-  async function submit() {
+  async function submit(options?: {
+    guest?: {
+      guestName: string;
+      guestKey?: string;
+    };
+  }) {
     if (viewer?.role === "admin") {
       return;
     }
 
-    if ((mode === "comment" && !canComment) || (mode === "question" && !canAskQuestion)) {
+    if (!canComment) {
+      setError(locale === "zh" ? "请先以学生身份登录或继续。" : "Please continue as a student first.");
       return;
     }
 
-    if (mustUseGuestIdentity) {
-      try {
-        await ensureGuestIdentity();
-      } catch {
-        return;
-      }
+    const guestPayload =
+      !viewer && (options?.guest?.guestName || identity.guestDisplayName)
+        ? {
+            guestName: options?.guest?.guestName ?? identity.guestDisplayName!,
+            guestKey: options?.guest?.guestKey ?? identity.guestKey ?? ""
+          }
+        : undefined;
+
+    if (mustUseGuestIdentity && !guestPayload?.guestKey) {
+      setError(null);
+      setPendingSubmit(true);
+      setGuestDialogOpen(true);
+      return;
+    }
+
+    if (mustUseGuestIdentity && !guestPayload) {
+      setError(null);
+      setPendingSubmit(true);
+      setGuestDialogOpen(true);
+      return;
+    }
+
+    if (!body.trim()) {
+      setError(locale === "zh" ? "请输入评论内容。" : "Please enter a comment.");
+      return;
     }
 
     setSubmitting(true);
+    setError(null);
     try {
-      const endpoint = mode === "comment" ? "/api/comments" : "/api/questions";
-      const payload =
-        mode === "comment"
-          ? {
-              targetType,
-              targetId,
-              title,
-              body,
-              visibility,
-              ratings: [],
-              guest:
-                !viewer && identity.guestDisplayName && identity.guestKey
-                  ? {
-                      guestName: identity.guestDisplayName,
-                      guestKey: identity.guestKey
-                    }
-                  : undefined
-            }
-          : {
-              targetType,
-              targetId,
-              title,
-              body,
-              guest:
-                !viewer && identity.guestDisplayName && identity.guestKey
-                  ? {
-                      guestName: identity.guestDisplayName,
-                      guestKey: identity.guestKey
-                    }
-                  : undefined
-            };
-
-      const response = await fetch(endpoint, {
+      const response = await fetch("/api/comments", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          targetType,
+          targetId,
+          body: body.trim(),
+          visibility,
+          ratings: [],
+          guest: !viewer ? guestPayload : undefined
+        })
       });
 
       if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        setError(payload?.error ?? (locale === "zh" ? "评论发布失败，请重试。" : "Unable to post the comment. Please try again."));
         return;
       }
 
-      setTitle("");
       setBody("");
       setVisibility("PUBLIC_ONLY");
       onMutated?.();
+      onPosted?.();
+      if (onPosted) {
+        return;
+      }
+      window.requestAnimationFrame(() => {
+        const anchor = document.getElementById(successAnchorId);
+        if (!anchor) {
+          return;
+        }
+
+        window.history.replaceState(null, "", `#${successAnchorId}`);
+        anchor.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     } finally {
       setSubmitting(false);
     }
@@ -167,32 +180,16 @@ export function DiscussionComposer({
 
   return (
     <Card>
-      <div className="flex items-center gap-2 rounded-full bg-[var(--surface-alt)] p-1 text-sm">
-        <button
-          type="button"
-          onClick={() => setMode("comment")}
-          className={`rounded-full px-4 py-2 ${mode === "comment" ? "bg-white font-semibold text-[var(--foreground)]" : "text-[var(--muted)]"}`}
-        >
-          {copy.writeComment}
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode("question")}
-          disabled={!canAskQuestion}
-          className={`rounded-full px-4 py-2 ${mode === "question" ? "bg-white font-semibold text-[var(--foreground)]" : "text-[var(--muted)]"} ${!canAskQuestion ? "cursor-not-allowed opacity-50" : ""}`}
-        >
-          {copy.askQuestion}
-        </button>
-      </div>
+      <div className="text-sm font-semibold text-[var(--foreground)]">{copy.writeComment}</div>
       <p className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">{copy.communityGuidelines}</p>
       {viewer?.role === "admin" ? (
         <p className="mt-4 rounded-2xl bg-slate-100 px-4 py-3 text-sm text-slate-700">
-          {locale === "zh" ? "管理员可回复现有内容，但不能发布新的评论或提问。" : "Admins can reply to existing threads, but cannot publish new top-level comments or questions."}
+          {locale === "zh" ? "管理员可回复现有内容，但不能发布新的评论。" : "Admins can reply to existing threads, but cannot publish new top-level comments."}
         </p>
       ) : null}
       {viewer?.role === "teacher" ? (
         <p className="mt-4 rounded-2xl bg-blue-50 px-4 py-3 text-sm text-blue-900">
-          {locale === "zh" ? "教师可以发布评论。提问仍由学生发起。" : "Teachers can post comments here. Questions remain student-led."}
+          {locale === "zh" ? "教师可以在这里发布评论。" : "Teachers can post comments here."}
         </p>
       ) : null}
       {!viewer && identity.selectedRole !== "student" ? (
@@ -202,60 +199,35 @@ export function DiscussionComposer({
       ) : null}
       {!viewer && identity.status === "student-browser" ? (
         <p className="mt-4 rounded-2xl bg-blue-50 px-4 py-3 text-sm text-blue-900">
-          {locale === "zh" ? "你可以先选择一个游客名称，再直接评论或提问。" : "You can post without full registration. We will ask for a guest display name first."}
+          {locale === "zh" ? "你可以先选择一个游客名称，再直接发表评论。" : "You can post without full registration. We will ask for a guest display name first."}
         </p>
       ) : null}
       <div className="mt-4 grid gap-4">
-        {mode === "comment" ? (
-          <>
-            <input
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder={locale === "en" ? "Add a short title" : "填写一个简短标题"}
-              className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3 outline-none focus:border-[var(--primary)]"
-            />
-            <textarea
-              rows={5}
-              value={body}
-              onChange={(event) => setBody(event.target.value)}
-              placeholder={locale === "en" ? "Share your experience constructively..." : "请建设性地分享你的体验..."}
-              className="rounded-3xl border border-[var(--border)] bg-white px-4 py-3 outline-none focus:border-[var(--primary)]"
-            />
-            <select
-              className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none"
-              value={visibility}
-              onChange={(event) => setVisibility(event.target.value as "PUBLIC_ONLY" | "PUBLIC_AND_TEACHER")}
-            >
-              <option value="PUBLIC_ONLY">{copy.publicOnly}</option>
-              <option value="PUBLIC_AND_TEACHER">{copy.visibleToTeacher}</option>
-            </select>
-          </>
-        ) : (
-          <>
-            <input
-              value={title}
-              onChange={(event) => setTitle(event.target.value)}
-              placeholder={locale === "en" ? "What do you want to know?" : "你想了解什么？"}
-              className="rounded-2xl border border-[var(--border)] bg-white px-4 py-3 outline-none focus:border-[var(--primary)]"
-            />
-            <textarea
-              rows={5}
-              value={body}
-              onChange={(event) => setBody(event.target.value)}
-              placeholder={locale === "en" ? "Ask a clear, specific question..." : "请清晰具体地描述问题..."}
-              className="rounded-3xl border border-[var(--border)] bg-white px-4 py-3 outline-none focus:border-[var(--primary)]"
-            />
-          </>
-        )}
+        <textarea
+          rows={5}
+          value={body}
+          onChange={(event) => setBody(event.target.value)}
+          placeholder={locale === "en" ? "Share your experience constructively..." : "请建设性地分享你的体验..."}
+          className="min-w-0 w-full rounded-3xl border border-[var(--border)] bg-white px-4 py-3 outline-none focus:border-[var(--primary)]"
+        />
+        <select
+          className="min-w-0 w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none"
+          value={visibility}
+          onChange={(event) => setVisibility(event.target.value as "PUBLIC_ONLY" | "PUBLIC_AND_TEACHER")}
+        >
+          <option value="PUBLIC_AND_TEACHER">{copy.visibleToTeacherOption}</option>
+          <option value="PUBLIC_ONLY">{copy.publicOnlyOption}</option>
+        </select>
       </div>
+      {error ? <div className="mt-4 text-sm text-[var(--danger)]">{error}</div> : null}
       <div className="mt-5 flex justify-end">
         <button
           type="button"
           onClick={() => void submit()}
-          disabled={submitting || viewer?.role === "admin" || (mode === "comment" ? !canComment : !canAskQuestion)}
+          disabled={submitting || viewer?.role === "admin" || !canComment}
           className="rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
         >
-          {mode === "comment" ? copy.writeComment : copy.askQuestion}
+          {copy.writeComment}
         </button>
       </div>
       <GuestNameDialog

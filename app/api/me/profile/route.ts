@@ -102,10 +102,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Teacher profile not found." }, { status: 404 });
     }
 
+    const normalizedDisplayName = parsed.data.displayName.trim();
+    const existingTeacher = await prisma.teacherProfile.findFirst({
+      where: {
+        userId: {
+          not: session.user.id
+        },
+        displayName: {
+          equals: normalizedDisplayName,
+          mode: "insensitive"
+        }
+      },
+      select: { id: true }
+    });
+
+    if (existingTeacher) {
+      return NextResponse.json({ error: "Teacher name already in use." }, { status: 409 });
+    }
+
     await prisma.teacherProfile.update({
       where: { userId: session.user.id },
       data: {
-        displayName: parsed.data.displayName,
+        displayName: normalizedDisplayName,
         department: parsed.data.department,
         subjectArea: parsed.data.subjectArea,
         shortBio: parsed.data.shortBio ?? "",

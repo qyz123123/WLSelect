@@ -84,19 +84,15 @@ export function QuestionThread({
                 <h3 className="text-sm font-semibold">{question.title}</h3>
               )}
               <div className="mt-1 text-xs text-[var(--muted)]">
-                {question.authorName} • {new Date(question.createdAt).toLocaleDateString()}
+                {question.authorName} • {new Date(question.createdAt).toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US")}
               </div>
               {question.targetHref ? (
                 <div className="mt-2 text-xs text-[var(--muted)]">
                   {question.targetLabel
                     ? `${copy.overview}: ${question.targetLabel}`
                     : question.targetType === "teacher"
-                      ? locale === "zh"
-                        ? "教师页面"
-                        : "Teacher page"
-                      : locale === "zh"
-                        ? "课程页面"
-                        : "Course page"}
+                      ? copy.teacherPage
+                      : copy.coursePage}
                 </div>
               ) : null}
             </div>
@@ -119,7 +115,7 @@ export function QuestionThread({
               <ThumbsUp className="h-4 w-4" />
               {question.likes}
             </button>
-            <span>{question.replies.length} answers</span>
+            <span>{locale === "zh" ? `${question.replies.length}${copy.answers}` : `${question.replies.length} ${copy.answers}`}</span>
             {question.targetHref ? (
               <Link
                 href={question.targetHref}
@@ -138,7 +134,7 @@ export function QuestionThread({
                     <div className="text-xs font-semibold text-[var(--muted)]">{reply.authorName}</div>
                     {reply.accepted ? (
                       <span className="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
-                        Accepted
+                        {copy.accepted}
                       </span>
                     ) : null}
                   </div>
@@ -158,7 +154,7 @@ export function QuestionThread({
                     [question.id]: event.target.value
                   }))
                 }
-                placeholder="Write an answer..."
+                placeholder={copy.writeAnswerPlaceholder}
                 className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none"
               />
               <div className="mt-3 flex justify-end">
@@ -167,7 +163,7 @@ export function QuestionThread({
                   onClick={() => void submitReply(question.id)}
                   className="rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white"
                 >
-                  Answer
+                  {copy.answer}
                 </button>
               </div>
             </div>

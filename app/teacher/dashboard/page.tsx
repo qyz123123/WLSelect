@@ -52,7 +52,7 @@ export default function TeacherDashboardPage() {
         </div>
       </Card>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-6 2xl:grid-cols-[minmax(0,1fr)_360px]">
         <Card>
           <SectionHeading
             title={locale === "zh" ? "资料提醒" : "Profile reminders"}

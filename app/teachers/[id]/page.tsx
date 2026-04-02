@@ -7,8 +7,8 @@ import { Card } from "@/components/card";
 import { CommentThread } from "@/components/comment-thread";
 import { DetailHero } from "@/components/detail-hero";
 import { DiscussionComposer } from "@/components/discussion-composer";
+import { useIdentity } from "@/components/identity-provider";
 import { useLocale } from "@/components/locale-provider";
-import { QuestionThread } from "@/components/question-thread";
 import { RatingGrid } from "@/components/rating-grid";
 import { RatingSummary } from "@/components/rating-summary";
 import { RoleBadge } from "@/components/role-badge";
@@ -19,14 +19,16 @@ import { AppUser, Comment, Question, TeacherProfile } from "@/lib/types";
 
 export default function TeacherDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { copy } = useLocale();
+  const { copy, locale } = useLocale();
+  const { identity } = useIdentity();
   const [refreshNonce, setRefreshNonce] = useState(0);
+  const detailUrl = `/api/teachers/${id}?r=${refreshNonce}${identity.guestKey ? `&guestKey=${encodeURIComponent(identity.guestKey)}` : ""}`;
   const { data, loading, error, setData } = useApiData<{
     viewer: AppUser | null;
     teacher: TeacherProfile;
     comments: Comment[];
     questions: Question[];
-  }>(`/api/teachers/${id}?r=${refreshNonce}`);
+  }>(detailUrl);
   const teacher = data?.teacher;
 
   if (error) {
@@ -37,12 +39,11 @@ export default function TeacherDetailPage({ params }: { params: Promise<{ id: st
     );
   }
 
-  if (loading || !teacher) {
-    return <Card>Loading teacher profile...</Card>;
+  if (!teacher) {
+    return <Card>{copy.loadingTeacherProfile}</Card>;
   }
 
-  const comments = data.comments;
-  const questions = data.questions;
+  const comments = data?.comments ?? [];
 
   return (
     <div className="space-y-6">
@@ -55,7 +56,7 @@ export default function TeacherDetailPage({ params }: { params: Promise<{ id: st
         targetType="teacher"
         targetId={teacher.id}
         initialFavorite={teacher.isFavorite}
-        canFavorite={Boolean(data.viewer)}
+        canFavorite={Boolean(data.viewer || identity.selectedRole === "student")}
         onMutated={() => setRefreshNonce((current) => current + 1)}
         discussionHref="#discussion-section"
         extra={
@@ -65,10 +66,10 @@ export default function TeacherDetailPage({ params }: { params: Promise<{ id: st
           </div>
         }
       />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-6 2xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-6">
           <Card>
-            <SectionHeading title={copy.ratings} description="Student ratings and teacher self-ratings are clearly separated." />
+            <SectionHeading title={copy.ratings} description={locale === "zh" ? "学生评分与教师自评分开显示。" : "Student ratings and teacher self-ratings are clearly separated."} />
             <RatingSummary ratings={teacher.ratings} />
             <div className="mt-5">
               <RatingGrid
@@ -99,20 +100,17 @@ export default function TeacherDetailPage({ params }: { params: Promise<{ id: st
               targetId={teacher.id}
               viewer={data.viewer}
               onMutated={() => setRefreshNonce((current) => current + 1)}
+              successAnchorId="comments-section"
             />
           </div>
-          <Card>
-            <SectionHeading title={copy.comments} description="Students can choose whether feedback is public-only or also visible to the teacher." />
+          <Card id="comments-section">
+            <SectionHeading title={copy.comments} description={locale === "zh" ? "每条评论都可以选择对教师可见或隐藏。" : "Each comment can be marked visible to the teacher or hidden."} />
             <CommentThread comments={comments} canReply={Boolean(data.viewer)} onMutated={() => setRefreshNonce((current) => current + 1)} />
-          </Card>
-          <Card>
-            <SectionHeading title={copy.questions} description="Questions support answers, likes, and answered state." />
-            <QuestionThread questions={questions} canReply={Boolean(data.viewer)} onMutated={() => setRefreshNonce((current) => current + 1)} />
           </Card>
         </div>
         <div className="space-y-6">
           <Card>
-            <SectionHeading title="Courses taught" />
+            <SectionHeading title={copy.coursesTaught} />
             <div className="space-y-3">
               {teacher.courseLinks?.length
                 ? teacher.courseLinks.map((course) => (

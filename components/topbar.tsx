@@ -71,7 +71,7 @@ export function Topbar({
             className="min-w-0 flex-1 border-none bg-transparent text-sm outline-none placeholder:text-[var(--muted)]"
           />
           <button type="button" onClick={submitSearch} className="shrink-0 rounded-full bg-[var(--primary)] px-3 py-1 text-xs font-semibold text-white">
-            Search
+            {copy.searchAction}
           </button>
         </label>
         <div className="order-1 flex min-w-0 items-center gap-2 sm:gap-3 lg:order-2">
@@ -97,7 +97,7 @@ export function Topbar({
                 type="button"
                 onClick={() => void handleExit()}
                 className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] bg-white text-[var(--muted)]"
-                aria-label="Sign out"
+                aria-label={copy.signOutAction}
               >
                 <LogOut className="h-4 w-4" />
               </button>
@@ -108,7 +108,7 @@ export function Topbar({
                 {identity.guestDisplayName}
               </div>
               <Link href="/student/login" className="rounded-full border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold sm:px-4">
-                {locale === "zh" ? "登录" : "Log in"}
+                {copy.logIn}
               </Link>
               <button
                 type="button"
@@ -122,17 +122,17 @@ export function Topbar({
           ) : (
             <div className="flex items-center gap-2">
               <Link href={loginHref} className="rounded-full border border-[var(--border)] bg-white px-3 py-2 text-sm font-semibold sm:px-4">
-                {teacherSelected ? (locale === "zh" ? "教师登录" : "Teacher login") : locale === "zh" ? "登录" : "Log in"}
+                {teacherSelected ? (locale === "zh" ? "教师登录" : "Teacher login") : copy.logIn}
               </Link>
               <Link href={signupHref} className="rounded-full bg-[var(--primary)] px-3 py-2 text-sm font-semibold text-white sm:px-4">
-                {teacherSelected ? (locale === "zh" ? "教师注册" : "Teacher register") : locale === "zh" ? "注册" : "Sign up"}
+                {teacherSelected ? (locale === "zh" ? "教师注册" : "Teacher register") : copy.signUp}
               </Link>
               {identity.selectedRole ? (
                 <button
                   type="button"
                   onClick={() => void handleExit()}
                   className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] bg-white text-[var(--muted)]"
-                  aria-label="Switch identity"
+                  aria-label={copy.switchIdentity}
                 >
                   <ArrowLeftRight className="h-4 w-4" />
                 </button>

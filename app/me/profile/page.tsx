@@ -11,7 +11,7 @@ import { useApiData } from "@/hooks/use-api-data";
 import { AppUser, StudentProfile, TeacherProfile } from "@/lib/types";
 
 export default function ProfilePage() {
-  const { copy } = useLocale();
+  const { copy, locale } = useLocale();
   const { data, loading, error } = useApiData<{
     user: AppUser | null;
     profile: StudentProfile | null;
@@ -112,11 +112,12 @@ export default function ProfilePage() {
   }
 
   if (loading) {
-    return <Card>Loading profile...</Card>;
+    return <Card>{copy.loadingProfile}</Card>;
   }
 
   if (error || !user) {
-    return <Card>{error ?? "Please log in to view your profile."}</Card>;
+    const displayError = error === "Unauthorized." || !user ? "请先登录" : error;
+    return <Card>{displayError}</Card>;
   }
 
   return (
@@ -138,12 +139,12 @@ export default function ProfilePage() {
             </div>
           </div>
           <button type="button" onClick={() => void saveProfile()} className="rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white">
-            {saving ? "Saving..." : "Save profile"}
+            {saving ? copy.saving : copy.saveProfile}
           </button>
         </div>
       </Card>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-6 2xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-6">
           <Card>
             <SectionHeading title={copy.profile} description={copy.privacyWarning} />
@@ -172,7 +173,7 @@ export default function ProfilePage() {
                   >
                     <option>AP</option>
                     <option>AL</option>
-                    <option>GENERAL</option>
+                    <option value="GENERAL">{locale === "zh" ? "普通课程" : "General"}</option>
                   </select>
                 </div>
                 <textarea
@@ -187,20 +188,20 @@ export default function ProfilePage() {
                 <input
                   value={teacherForm.displayName}
                   onChange={(event) => setTeacherForm((current) => ({ ...current, displayName: event.target.value }))}
-                  placeholder="Display name"
+                  placeholder={locale === "zh" ? "显示名称" : "Display name"}
                   className="rounded-2xl border border-[var(--border)] px-4 py-3 outline-none"
                 />
                 <div className="grid gap-4 md:grid-cols-2">
                   <input
                     value={teacherForm.department}
                     onChange={(event) => setTeacherForm((current) => ({ ...current, department: event.target.value }))}
-                    placeholder="Department"
+                    placeholder={locale === "zh" ? "部门" : "Department"}
                     className="rounded-2xl border border-[var(--border)] px-4 py-3 outline-none"
                   />
                   <input
                     value={teacherForm.subjectArea}
                     onChange={(event) => setTeacherForm((current) => ({ ...current, subjectArea: event.target.value }))}
-                    placeholder="Subject area"
+                    placeholder={locale === "zh" ? "学科方向" : "Subject area"}
                     className="rounded-2xl border border-[var(--border)] px-4 py-3 outline-none"
                   />
                 </div>
@@ -208,14 +209,14 @@ export default function ProfilePage() {
                   rows={3}
                   value={teacherForm.shortBio}
                   onChange={(event) => setTeacherForm((current) => ({ ...current, shortBio: event.target.value }))}
-                  placeholder="Short bio"
+                  placeholder={locale === "zh" ? "简介" : "Short bio"}
                   className="rounded-3xl border border-[var(--border)] px-4 py-3 outline-none"
                 />
                 <textarea
                   rows={3}
                   value={teacherForm.teachingStyle}
                   onChange={(event) => setTeacherForm((current) => ({ ...current, teachingStyle: event.target.value }))}
-                  placeholder="Teaching style"
+                  placeholder={locale === "zh" ? "教学风格" : "Teaching style"}
                   className="rounded-3xl border border-[var(--border)] px-4 py-3 outline-none"
                 />
               </div>
@@ -223,7 +224,7 @@ export default function ProfilePage() {
           </Card>
           {user.role === "student" && profile ? (
             <Card>
-              <SectionHeading title={copy.coursesTaken} description="Edit course history using course names from the official list." />
+              <SectionHeading title={copy.coursesTaken} description={copy.editCourseHistory} />
               <div className="grid gap-4 md:grid-cols-2">
                 {(["G9", "G10", "G11", "G12"] as const).map((grade) => (
                   <div key={grade} className="rounded-3xl border border-[var(--border)] p-4">
@@ -246,7 +247,7 @@ export default function ProfilePage() {
                 ))}
               </div>
               <div className="mt-4 text-sm text-[var(--muted)]">
-                Official course names:
+                {copy.officialCourseNames}
                 {" "}
                 {coursesData.data?.items.map((course) => course.name).join(", ")}
               </div>
@@ -256,10 +257,10 @@ export default function ProfilePage() {
         {user.role === "teacher" ? (
           <div className="space-y-6">
             <Card>
-              <SectionHeading title="Teacher dashboard" description="Profile reminders and interaction counts live in the dashboard." />
+              <SectionHeading title={copy.teacherDashboard} description={copy.teacherDashboardHint} />
               <div className="mt-4">
                 <Link href="/teacher/dashboard" className="inline-flex rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white">
-                  Open dashboard
+                  {copy.openDashboard}
                 </Link>
               </div>
             </Card>

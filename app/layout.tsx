@@ -9,7 +9,7 @@ import { defaultLocale } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   title: "WLSelect",
-  description: "School community platform for exploring teachers and courses."
+  description: "School community platform for exploring teachers."
 };
 
 export default async function RootLayout({
@@ -31,8 +31,8 @@ export default async function RootLayout({
         <AppShell
           initialLocale={viewer?.language ?? defaultLocale}
           viewer={viewer}
-          teachers={teachers.slice(0, 2)}
-          courses={courses.slice(0, 3)}
+          teachers={teachers}
+          courses={courses}
           notifications={notifications}
           unreadNotifications={notifications.filter((notification) => !notification.read).length}
         >

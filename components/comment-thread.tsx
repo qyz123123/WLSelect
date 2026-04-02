@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowUpRight, Eye, Lock, MessageSquareText, ThumbsUp } from "lucide-react";
 
 import { Card } from "@/components/card";
@@ -21,6 +22,7 @@ export function CommentThread({
 }) {
   const { copy, locale } = useLocale();
   const { identity, enableGuestPosting } = useIdentity();
+  const router = useRouter();
   const [items, setItems] = useState(comments);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
@@ -136,6 +138,7 @@ export function CommentThread({
       )
     );
     onMutated?.();
+    router.refresh();
   }
 
   async function submitReply(commentId: string) {
@@ -179,6 +182,7 @@ export function CommentThread({
 
     setReplyDrafts((current) => ({ ...current, [commentId]: "" }));
     onMutated?.();
+    router.refresh();
   }
 
   return (

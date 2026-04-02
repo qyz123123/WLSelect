@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Star } from "lucide-react";
 
 import { GuestNameDialog } from "@/components/guest-name-dialog";
@@ -26,6 +27,7 @@ export function RatingGrid({
 }) {
   const { locale, copy } = useLocale();
   const { identity, enableGuestPosting } = useIdentity();
+  const router = useRouter();
   const [items, setItems] = useState(ratings);
   const [draftScores, setDraftScores] = useState<Record<string, number>>({});
   const [draftMode, setDraftMode] = useState(false);
@@ -194,6 +196,8 @@ export function RatingGrid({
       if (!response.ok) {
         setItems(previous);
         onRatingsChange?.(previous);
+      } else {
+        router.refresh();
       }
     } catch {
       setItems(previous);
@@ -269,6 +273,7 @@ export function RatingGrid({
       onRatingsChange?.(next);
       setDraftMode(false);
       setDraftScores({});
+      router.refresh();
     } finally {
       setSubmittingBatch(false);
     }

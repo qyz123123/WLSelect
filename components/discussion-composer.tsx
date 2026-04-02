@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Card } from "@/components/card";
 import { GuestNameDialog } from "@/components/guest-name-dialog";
@@ -25,6 +26,7 @@ export function DiscussionComposer({
 }) {
   const { locale, copy } = useLocale();
   const { identity, enableGuestPosting } = useIdentity();
+  const router = useRouter();
   const [body, setBody] = useState("");
   const [visibility, setVisibility] = useState<"PUBLIC_ONLY" | "PUBLIC_AND_TEACHER">("PUBLIC_ONLY");
   const [submitting, setSubmitting] = useState(false);
@@ -160,6 +162,7 @@ export function DiscussionComposer({
       setBody("");
       setVisibility("PUBLIC_ONLY");
       onMutated?.();
+      router.refresh();
       onPosted?.();
       if (onPosted) {
         return;

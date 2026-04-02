@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { type ReactNode, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Bookmark, MessageSquareMore, Star } from "lucide-react";
 
 import { Card } from "@/components/card";
@@ -42,6 +43,7 @@ export function DetailHero({
 }) {
   const { copy } = useLocale();
   const { identity, enableGuestPosting } = useIdentity();
+  const router = useRouter();
   const [saved, setSaved] = useState(initialFavorite);
   const [submitting, setSubmitting] = useState(false);
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
@@ -123,6 +125,7 @@ export function DetailHero({
       const payload = (await response.json()) as { active: boolean };
       setSaved(payload.active);
       onMutated?.();
+      router.refresh();
     } finally {
       setSubmitting(false);
     }

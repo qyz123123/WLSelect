@@ -215,6 +215,7 @@ export function RightRail({
             : teacher
         )
       );
+      router.refresh();
       return;
     }
 
@@ -227,8 +228,9 @@ export function RightRail({
               stars: Math.max(0, course.stars + (payload.active ? 1 : -1))
             }
           : course
-      )
+        )
     );
+    router.refresh();
   }
 
   return (

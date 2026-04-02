@@ -32,6 +32,8 @@ export function RightRail({
   const showGuestHomeCard = !user && pathname === "/";
   const [teacherItems, setTeacherItems] = useState(teachers);
   const [courseItems, setCourseItems] = useState(courses);
+  const [showAllTeachers, setShowAllTeachers] = useState(false);
+  const [showAllCourses, setShowAllCourses] = useState(false);
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
   const [guestSuggestion, setGuestSuggestion] = useState(identity.guestDisplayName ?? "");
   const [guestLoading, setGuestLoading] = useState(false);
@@ -39,10 +41,12 @@ export function RightRail({
 
   useEffect(() => {
     setTeacherItems(teachers);
+    setShowAllTeachers(false);
   }, [teachers]);
 
   useEffect(() => {
     setCourseItems(courses);
+    setShowAllCourses(false);
   }, [courses]);
 
   useEffect(() => {
@@ -94,8 +98,7 @@ export function RightRail({
             overallScore: ratingSummary.average
           };
         })
-        .sort((a, b) => b.trendScore - a.trendScore || b.stars - a.stars || a.name.localeCompare(b.name))
-        .slice(0, 5),
+        .sort((a, b) => b.trendScore - a.trendScore || b.stars - a.stars || a.name.localeCompare(b.name)),
     [courseItems]
   );
   const trendingTeachers = useMemo(
@@ -111,10 +114,11 @@ export function RightRail({
             overallScore: ratingSummary.average
           };
         })
-        .sort((a, b) => b.trendScore - a.trendScore || b.stars - a.stars || a.name.localeCompare(b.name))
-        .slice(0, 5),
+        .sort((a, b) => b.trendScore - a.trendScore || b.stars - a.stars || a.name.localeCompare(b.name)),
     [teacherItems]
   );
+  const visibleTeachers = showAllTeachers ? trendingTeachers : trendingTeachers.slice(0, 7);
+  const visibleCourses = showAllCourses ? trendingCourses : trendingCourses.slice(0, 7);
   const formatScore = (score: number) => (score > 0 ? (Number.isInteger(score) ? score.toFixed(0) : score.toFixed(1)) : "—");
   const getRankBadge = (index: number) => {
     if (index === 0) {
@@ -243,7 +247,7 @@ export function RightRail({
           <div className="space-y-3">
             <div className="space-y-2">
               <div className="text-sm font-semibold text-[var(--muted)]">老师榜</div>
-              {trendingTeachers.map((teacher, index) => {
+              {visibleTeachers.map((teacher, index) => {
                 const rankBadge = getRankBadge(index);
 
                 return (
@@ -288,10 +292,21 @@ export function RightRail({
                 </div>
               );
               })}
+              {!showAllTeachers && trendingTeachers.length > 7 ? (
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowAllTeachers(true)}
+                    className="inline-flex items-center rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[var(--surface-alt)]"
+                  >
+                    {copy.showMoreTeachers}
+                  </button>
+                </div>
+              ) : null}
             </div>
             <div className="space-y-2 pt-1">
               <div className="text-sm font-semibold text-[var(--muted)]">课程榜</div>
-              {trendingCourses.map((course, index) => {
+              {visibleCourses.map((course, index) => {
                 const rankBadge = getRankBadge(index);
 
                 return (
@@ -335,6 +350,17 @@ export function RightRail({
                 </div>
               );
               })}
+              {!showAllCourses && trendingCourses.length > 7 ? (
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowAllCourses(true)}
+                    className="inline-flex items-center rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[var(--surface-alt)]"
+                  >
+                    {copy.showMoreCourses}
+                  </button>
+                </div>
+              ) : null}
             </div>
           </div>
         </section>

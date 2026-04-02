@@ -185,6 +185,13 @@ export function CommentThread({
     <div className="space-y-4">
       {items.map((comment) => (
         <Card key={comment.id} id={`comment-${comment.id}`} className={comment.targetHref ? "transition hover:soft-ring" : undefined}>
+          {(() => {
+            const normalizedTitle = comment.title.trim();
+            const normalizedBody = comment.body.trim();
+            const showBody = normalizedBody.length > 0 && normalizedBody !== normalizedTitle;
+
+            return (
+              <>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               {comment.targetHref ? (
@@ -212,7 +219,7 @@ export function CommentThread({
               {comment.visibility === "PUBLIC_AND_TEACHER" ? copy.visibleToTeacher : copy.publicOnly}
             </div>
           </div>
-          <p className="mt-4 text-sm leading-6 text-[var(--foreground)]">{comment.body}</p>
+          {showBody ? <p className="mt-4 text-sm leading-6 text-[var(--foreground)]">{comment.body}</p> : null}
           <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
             <button
               type="button"
@@ -271,6 +278,9 @@ export function CommentThread({
               </div>
             </div>
           ) : null}
+              </>
+            );
+          })()}
         </Card>
       ))}
       <GuestNameDialog

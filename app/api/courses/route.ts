@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { auth } from "@/auth";
 import { getBrowseCourses, getCurrentUser } from "@/lib/data";
+import { readGuestKeyFromCookie } from "@/lib/identity-cookie-server";
 
 export async function GET(request: NextRequest) {
   const grade = request.nextUrl.searchParams.get("grade");
@@ -9,11 +10,13 @@ export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q");
   const session = await auth();
   const viewer = session?.user?.id ? await getCurrentUser(session.user.id) : null;
+  const guestKey = viewer ? undefined : await readGuestKeyFromCookie();
 
   const courses = await getBrowseCourses({
     grade: grade ?? undefined,
     system: system ?? undefined,
-    viewerId: viewer?.id
+    viewerId: viewer?.id,
+    guestKey
   });
 
   const filtered = query

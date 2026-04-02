@@ -5,6 +5,7 @@ import "@/app/globals.css";
 import { auth } from "@/auth";
 import { AppShell } from "@/components/app-shell";
 import { getCourses, getCurrentUser, getNotifications, getTeachers } from "@/lib/data";
+import { readGuestKeyFromCookie } from "@/lib/identity-cookie-server";
 import { defaultLocale } from "@/lib/i18n";
 
 export const metadata: Metadata = {
@@ -19,14 +20,15 @@ export default async function RootLayout({
 }>) {
   const session = await auth();
   const viewer = session?.user?.id ? await getCurrentUser(session.user.id) : null;
+  const guestKey = viewer ? undefined : await readGuestKeyFromCookie();
   const [teachers, courses, notifications] = await Promise.all([
-    getTeachers(viewer?.id),
-    getCourses(viewer?.id),
+    getTeachers(viewer?.id, guestKey),
+    getCourses(viewer?.id, guestKey),
     viewer ? getNotifications(viewer.id) : Promise.resolve([])
   ]);
 
   return (
-    <html lang="en">
+    <html lang="zh" suppressHydrationWarning>
       <body>
         <AppShell
           initialLocale={viewer?.language ?? defaultLocale}

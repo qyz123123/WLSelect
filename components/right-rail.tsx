@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Star } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { GuestNameDialog } from "@/components/guest-name-dialog";
 import { useIdentity } from "@/components/identity-provider";
@@ -16,16 +16,19 @@ export function RightRail({
   teachers,
   courses,
   notifications,
-  user
+  user,
+  variant = "full"
 }: {
   teachers: TeacherProfile[];
   courses: Course[];
   notifications: NotificationItem[];
   user: AppUser | null;
+  variant?: "full" | "trending-only" | "no-trending";
 }) {
   const { copy, locale } = useLocale();
   const { identity, enableGuestPosting } = useIdentity();
   const pathname = usePathname();
+  const router = useRouter();
   const showGuestHomeCard = !user && pathname === "/";
   const [teacherItems, setTeacherItems] = useState(teachers);
   const [courseItems, setCourseItems] = useState(courses);
@@ -113,6 +116,33 @@ export function RightRail({
     [teacherItems]
   );
   const formatScore = (score: number) => (score > 0 ? (Number.isInteger(score) ? score.toFixed(0) : score.toFixed(1)) : "—");
+  const getRankBadge = (index: number) => {
+    if (index === 0) {
+      return {
+        label: locale === "zh" ? "金牌 1" : "Gold 1",
+        className: "bg-amber-100 text-amber-800"
+      };
+    }
+
+    if (index === 1) {
+      return {
+        label: locale === "zh" ? "银牌 2" : "Silver 2",
+        className: "bg-slate-200 text-slate-700"
+      };
+    }
+
+    if (index === 2) {
+      return {
+        label: locale === "zh" ? "铜牌 3" : "Bronze 3",
+        className: "bg-orange-100 text-orange-700"
+      };
+    }
+
+    return {
+      label: String(index + 1),
+      className: "bg-white text-[var(--muted)]"
+    };
+  };
 
   async function saveGuestIdentity(name: string) {
     const response = await fetch("/api/guest/display-name", {
@@ -198,72 +228,118 @@ export function RightRail({
   }
 
   return (
-    <div className="hidden space-y-4 2xl:block">
-      <section className="card-surface rounded-[28px] p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold">{copy.trending}</h2>
-          <span className="text-xs text-[var(--muted)]">{copy.starred}</span>
-        </div>
-        <p className="mb-4 text-xs leading-5 text-[var(--muted)]">
-          {locale === "zh"
-            ? "老师和课程都按综合评分与星标数排序。"
-            : "Teachers and courses are both ranked by comprehensive score and stars."}
-        </p>
-        <div className="space-y-3">
-          <div className="space-y-2">
-            <div className="text-sm font-semibold text-[var(--muted)]">学生榜</div>
-            {trendingCourses.map((course) => (
-              <div key={course.id} className="rounded-2xl bg-[var(--surface-alt)] px-3 py-3">
-                <div className="flex items-center justify-between gap-3">
-                  <Link href={`/courses/${course.slug}`} className="min-w-0 truncate text-sm font-semibold">
-                    {course.name}
-                  </Link>
-                  <div className="shrink-0 text-xs text-[var(--muted)]">
-                    <button
-                      type="button"
-                      onClick={() => void toggleFavorite("course", course.id)}
-                      className="inline-flex items-center gap-1 text-amber-600"
-                      aria-label={course.isFavorite ? `Unsave ${course.name}` : `Save ${course.name}`}
-                    >
-                      <Star className="h-3.5 w-3.5" fill={course.isFavorite ? "currentColor" : "none"} />
-                      {course.stars}
-                    </button>
-                    <span className="mx-1.5">•</span>
-                    <span>{locale === "zh" ? copy.overallScore : copy.overallScore}: {formatScore(course.overallScore)}</span>
+    <div className="space-y-4">
+      {variant === "no-trending" ? null : (
+        <section className="card-surface rounded-[28px] p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-base font-semibold">{copy.trending}</h2>
+            <span className="text-xs text-[var(--muted)]">{copy.starred}</span>
+          </div>
+          <p className="mb-4 text-xs leading-5 text-[var(--muted)]">
+            {locale === "zh"
+              ? "老师和课程都按综合评分与星标数排序。"
+              : "Teachers and courses are both ranked by comprehensive score and stars."}
+          </p>
+          <div className="space-y-3">
+            <div className="space-y-2">
+              <div className="text-sm font-semibold text-[var(--muted)]">老师榜</div>
+              {trendingTeachers.map((teacher, index) => {
+                const rankBadge = getRankBadge(index);
+
+                return (
+                <div
+                  key={teacher.id}
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => router.push(`/teachers/${teacher.id}`)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      router.push(`/teachers/${teacher.id}`);
+                    }
+                  }}
+                  className="cursor-pointer rounded-2xl bg-[var(--surface-alt)] px-3 py-3 transition hover:bg-[var(--primary-soft)]"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <Link href={`/teachers/${teacher.id}`} className="flex min-w-0 items-center gap-3">
+                      <div className={`inline-flex shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${rankBadge.className}`}>
+                        {rankBadge.label}
+                      </div>
+                      <img src={teacher.avatar} alt={teacher.name} className="h-9 w-9 rounded-full object-cover" />
+                      <div className="min-w-0 truncate text-sm font-semibold">{teacher.name}</div>
+                    </Link>
+                    <div className="shrink-0 text-xs text-[var(--muted)]">
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          void toggleFavorite("teacher", teacher.id);
+                        }}
+                        className="inline-flex items-center gap-1 text-amber-600"
+                        aria-label={teacher.isFavorite ? `Unsave ${teacher.name}` : `Save ${teacher.name}`}
+                      >
+                        <Star className="h-3.5 w-3.5" fill={teacher.isFavorite ? "currentColor" : "none"} />
+                        {teacher.stars}
+                      </button>
+                      <span className="mx-1.5">•</span>
+                      <span>{locale === "zh" ? copy.overallScore : copy.overallScore}: {formatScore(teacher.overallScore)}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-          <div className="space-y-2 pt-1">
-            <div className="text-sm font-semibold text-[var(--muted)]">老师榜</div>
-            {trendingTeachers.map((teacher) => (
-              <div key={teacher.id} className="rounded-2xl bg-[var(--surface-alt)] px-3 py-3">
-                <div className="flex items-center justify-between gap-3">
-                  <Link href={`/teachers/${teacher.id}`} className="flex min-w-0 items-center gap-3">
-                    <img src={teacher.avatar} alt={teacher.name} className="h-9 w-9 rounded-full object-cover" />
-                    <div className="min-w-0 truncate text-sm font-semibold">{teacher.name}</div>
-                  </Link>
-                  <div className="shrink-0 text-xs text-[var(--muted)]">
-                    <button
-                      type="button"
-                      onClick={() => void toggleFavorite("teacher", teacher.id)}
-                      className="inline-flex items-center gap-1 text-amber-600"
-                      aria-label={teacher.isFavorite ? `Unsave ${teacher.name}` : `Save ${teacher.name}`}
-                    >
-                      <Star className="h-3.5 w-3.5" fill={teacher.isFavorite ? "currentColor" : "none"} />
-                      {teacher.stars}
-                    </button>
-                    <span className="mx-1.5">•</span>
-                    <span>{locale === "zh" ? copy.overallScore : copy.overallScore}: {formatScore(teacher.overallScore)}</span>
+              );
+              })}
+            </div>
+            <div className="space-y-2 pt-1">
+              <div className="text-sm font-semibold text-[var(--muted)]">课程榜</div>
+              {trendingCourses.map((course, index) => {
+                const rankBadge = getRankBadge(index);
+
+                return (
+                <div
+                  key={course.id}
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => router.push(`/courses/${course.slug}`)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      router.push(`/courses/${course.slug}`);
+                    }
+                  }}
+                  className="cursor-pointer rounded-2xl bg-[var(--surface-alt)] px-3 py-3 transition hover:bg-[var(--primary-soft)]"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <Link href={`/courses/${course.slug}`} className="flex min-w-0 items-center gap-3">
+                      <div className={`inline-flex shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${rankBadge.className}`}>
+                        {rankBadge.label}
+                      </div>
+                      <div className="min-w-0 truncate text-sm font-semibold">{course.name}</div>
+                    </Link>
+                    <div className="shrink-0 text-xs text-[var(--muted)]">
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          void toggleFavorite("course", course.id);
+                        }}
+                        className="inline-flex items-center gap-1 text-amber-600"
+                        aria-label={course.isFavorite ? `Unsave ${course.name}` : `Save ${course.name}`}
+                      >
+                        <Star className="h-3.5 w-3.5" fill={course.isFavorite ? "currentColor" : "none"} />
+                        {course.stars}
+                      </button>
+                      <span className="mx-1.5">•</span>
+                      <span>{locale === "zh" ? copy.overallScore : copy.overallScore}: {formatScore(course.overallScore)}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
-      {showGuestHomeCard ? (
+        </section>
+      )}
+      {variant === "full" && showGuestHomeCard ? (
         <section className="card-surface rounded-[28px] p-5">
           <div className="text-sm font-semibold text-[var(--foreground)]">{copy.joinCommunity}</div>
           <p className="mt-4 text-sm leading-6 text-[var(--muted)]">{copy.privacyWarning}</p>
@@ -277,7 +353,7 @@ export function RightRail({
           </div>
         </section>
       ) : null}
-      {user ? (
+      {variant === "full" && user ? (
         <section className="card-surface rounded-[28px] p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-semibold">{copy.notifications}</h2>

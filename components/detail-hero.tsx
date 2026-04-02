@@ -46,6 +46,7 @@ export function DetailHero({
   const [submitting, setSubmitting] = useState(false);
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
   const [pendingFavorite, setPendingFavorite] = useState(false);
+  const usesGuestIdentity = identity.status === "student-browser" || identity.status === "student-guest";
 
   useEffect(() => {
     setSaved(initialFavorite);
@@ -84,7 +85,7 @@ export function DetailHero({
     }
 
     const guestPayload =
-      identity.selectedRole === "student" && identity.guestDisplayName && identity.guestKey
+      usesGuestIdentity && identity.guestDisplayName && identity.guestKey
         ? {
             guestName: identity.guestDisplayName,
             guestKey: identity.guestKey
@@ -95,7 +96,7 @@ export function DetailHero({
       return;
     }
 
-    if (identity.selectedRole === "student" && !guestPayload) {
+    if (usesGuestIdentity && !guestPayload) {
       setPendingFavorite(true);
       setGuestDialogOpen(true);
       return;
@@ -111,7 +112,7 @@ export function DetailHero({
         body: JSON.stringify({
           targetType,
           targetId,
-          guest: identity.selectedRole === "student" ? guestPayload : undefined
+          guest: usesGuestIdentity ? guestPayload : undefined
         })
       });
 

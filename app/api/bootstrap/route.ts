@@ -10,13 +10,15 @@ import {
     getStudentProfile,
     getTeachers
 } from "@/lib/data";
+import { readGuestKeyFromCookie } from "@/lib/identity-cookie-server";
 
 export async function GET() {
   const session = await auth();
   const currentUser = session?.user?.id ? await getCurrentUser(session.user.id) : null;
+  const guestKey = currentUser ? undefined : await readGuestKeyFromCookie();
   const [teachers, courses, notifications, studentProfile, feedItems] = await Promise.all([
-    getTeachers(currentUser?.id),
-    getCourses(currentUser?.id),
+    getTeachers(currentUser?.id, guestKey),
+    getCourses(currentUser?.id, guestKey),
     currentUser ? getNotifications(currentUser.id) : Promise.resolve([]),
     currentUser?.role === "student" ? getStudentProfile(currentUser.id) : Promise.resolve(null),
     getFeedItems(currentUser)

@@ -12,11 +12,6 @@ const accountCredentialsSchema = z.object({
   expectedRole: z.enum(["student", "admin"]).optional()
 });
 
-const teacherCredentialsSchema = z.object({
-  name: z.string().min(2).max(80),
-  expectedRole: z.literal("teacher")
-});
-
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
     strategy: "jwt"
@@ -33,34 +28,43 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         expectedRole: { label: "Expected role", type: "text" }
       },
       authorize: async (rawCredentials) => {
-        const teacherCredentials = teacherCredentialsSchema.safeParse(rawCredentials);
+        const normalizedName = typeof rawCredentials?.name === "string" ? rawCredentials.name.trim() : "";
+        const hasEmail = typeof rawCredentials?.email === "string" && rawCredentials.email.trim().length > 0;
+        const hasPassword = typeof rawCredentials?.password === "string" && rawCredentials.password.trim().length > 0;
+        const requestedTeacherLogin =
+          rawCredentials?.expectedRole === "teacher" ||
+          (normalizedName.length > 0 && !hasEmail && !hasPassword);
 
-        if (teacherCredentials.success) {
-          const normalizedName = teacherCredentials.data.name.trim();
-
-          const matches = await prisma.user.findMany({
-            where: {
-              role: UserRole.TEACHER,
-              teacherProfile: {
-                is: {
-                  displayName: {
-                    equals: normalizedName,
-                    mode: "insensitive"
-                  }
-                }
-              }
-            },
-            include: {
-              studentProfile: true,
-              teacherProfile: true
-            }
-          });
-
-          if (matches.length !== 1) {
+        if (requestedTeacherLogin) {
+          if (!normalizedName) {
             return null;
           }
 
-          const user = matches[0];
+          const teacher = await prisma.teacherProfile.findFirst({
+            where: {
+              displayName: {
+                equals: normalizedName,
+                mode: "insensitive"
+              },
+              user: {
+                role: UserRole.TEACHER
+              }
+            },
+            include: {
+              user: {
+                include: {
+                  studentProfile: true,
+                  teacherProfile: true
+                }
+              }
+            }
+          });
+
+          if (!teacher) {
+            return null;
+          }
+
+          const user = teacher.user;
           const displayName =
             user.teacherProfile?.displayName ??
             user.studentProfile?.accountName ??

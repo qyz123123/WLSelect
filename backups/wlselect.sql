@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict gY33LEHZC2IL1kycLB8Rs0Y1mFo4ugkL28Eb72sDrxYqL5HLJ3eWBxFbaFZZbMM
+\restrict cvYivb1fTk1IKtNgiUiXuN8TRdocwJdGomgsICjIQQwRecVHnW1PO5u8ARqS7Cn
 
 -- Dumped from database version 16.13
 -- Dumped by pg_dump version 16.13
@@ -571,7 +571,7 @@ ALTER TABLE public."User" OWNER TO postgres;
 --
 
 COPY public."Comment" (id, "authorId", "targetType", "teacherProfileId", "courseId", title, body, visibility, "isAnonymous", "isReported", "createdAt", "updatedAt", "guestKey", "guestName") FROM stdin;
-cmnh2jxa3000dx330grf1drva	\N	TEACHER	cmnh2h75v0001x330ekf3ycvl	\N	珠海的雨...	珠海的雨...	PUBLIC_ONLY	t	f	2026-04-02 06:03:37.66	2026-04-02 06:03:37.66	a1d42541-4cc9-4017-ac96-9f7d06a4d3e9	游客2778
+cmnhipncy0003x3ykik56lciz	\N	COURSE	\N	cmnh794hs0021x3ovth93wre3	这个课好难啊😭\n救命谁在学	这个课好难啊😭\n救命谁在学	PUBLIC_ONLY	t	f	2026-04-02 13:35:58.595	2026-04-02 13:35:58.595	64e5c53a-5060-4170-bb5f-5f3453ac0a3c	游客1676
 \.
 
 
@@ -588,7 +588,6 @@ COPY public."CommentLike" (id, "userId", "commentId", "createdAt", "guestKey") F
 --
 
 COPY public."CommentReply" (id, "commentId", "authorId", body, "createdAt", "updatedAt", "guestKey", "guestName") FROM stdin;
-cmnh2l5aa000fx330xbxty8em	cmnh2jxa3000dx330grf1drva	\N	老师讲课很清楚，课堂氛围很喜欢。目前wlsa最喜欢的老师top3	2026-04-02 06:04:34.691	2026-04-02 06:04:34.691	a1d42541-4cc9-4017-ac96-9f7d06a4d3e9	游客2778
 \.
 
 
@@ -605,106 +604,106 @@ COPY public."CommentReplyLike" (id, "userId", "commentReplyId", "createdAt") FRO
 --
 
 COPY public."Course" (id, slug, code, name, subject, description, "gradeLevels", system, prerequisites, "createdAt", "updatedAt") FROM stdin;
-cmnh2dr9j001nx322uwil9s3w	ap-biology-grade-11	AP-BIOLOGY-GRADE-11	AP Biology	Biology	AP Biology for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001ox322dkpdj4ww	physiology-and-ecology-grade-11	PHYSIOLOGY-AND-ECOLOGY-GRADE-11	Physiology and Ecology	Biology	Physiology and Ecology for Grade 11 students. Regular track.	{G11}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001px322da92c57g	ap-environmental-science-grade-11	AP-ENVIRONMENTAL-SCIENCE-GRADE-11	AP Environmental Science	Biology	AP Environmental Science for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001qx3225az3cba9	ap-studio-art-grade-11	AP-STUDIO-ART-GRADE-11	AP Studio Art	Arts	AP Studio Art for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001rx322wa40peyy	ap-art-history-grade-11	AP-ART-HISTORY-GRADE-11	AP Art History	Humanities	AP Art History for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001sx3222igtffrc	world-theatre-studies-grade-11	WORLD-THEATRE-STUDIES-GRADE-11	World Theatre Studies	Arts	World Theatre Studies for Grade 11 students. Regular track.	{G11}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001tx3226r3u82r2	ap-music-theory-grade-11	AP-MUSIC-THEORY-GRADE-11	AP Music Theory	Arts	AP Music Theory for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001ux3220f8vgl1t	united-states-history-ii-grade-11	UNITED-STATES-HISTORY-II-GRADE-11	United States History II	Humanities	United States History II for Grade 11 students. Regular track.	{G11}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001vx3222c3ysc9r	world-history-ii-grade-11	WORLD-HISTORY-II-GRADE-11	World History II	Humanities	World History II for Grade 11 students. Regular track.	{G11}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001wx3226g9hvr5p	ap-united-states-history-grade-11	AP-UNITED-STATES-HISTORY-GRADE-11	AP United States History	Humanities	AP United States History for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001xx322bttk0udk	ap-world-history-grade-11	AP-WORLD-HISTORY-GRADE-11	AP World History	Humanities	AP World History for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001yx322ata4id6k	ap-human-geography-grade-11	AP-HUMAN-GEOGRAPHY-GRADE-11	AP Human Geography	Humanities	AP Human Geography for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001zx32260mp9pxu	ap-european-history-grade-11	AP-EUROPEAN-HISTORY-GRADE-11	AP European History	Humanities	AP European History for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0020x3227r4n2vsu	ap-computer-science-a-grade-11	AP-COMPUTER-SCIENCE-A-GRADE-11	AP Computer Science A	Computer Science	AP Computer Science A for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0021x322d8ix0mt5	adv-artificial-intelligence-grade-11	ADV-ARTIFICIAL-INTELLIGENCE-GRADE-11	Adv. Artificial Intelligence	Computer Science	Adv. Artificial Intelligence for Grade 11 students. Advanced track.	{G11}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0022x3227x6ft228	ap-psychology-grade-11	AP-PSYCHOLOGY-GRADE-11	AP Psychology	Psychology	AP Psychology for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0023x322liuhykia	ap-comparative-government-and-politics-grade-11	AP-COMPARATIVE-GOVERNMENT-AND-POLITICS-GRADE-11	AP Comparative Government & Politics	Humanities	AP Comparative Government & Politics for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0024x322nx6cmlvj	ap-micro-economics-grade-11	AP-MICRO-ECONOMICS-GRADE-11	AP Micro-Economics	Economics	AP Micro-Economics for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0025x3226pv4495j	ap-macro-economics-grade-11	AP-MACRO-ECONOMICS-GRADE-11	AP Macro-Economics	Economics	AP Macro-Economics for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0026x322fzw50ldz	adv-differential-equations-and-graph-theory-grade-11	ADV-DIFFERENTIAL-EQUATIONS-AND-GRAPH-THEORY-GRADE-11	Adv. Differential Equations & Graph Theory	General Studies	Adv. Differential Equations & Graph Theory for Grade 11 students. Advanced track.	{G11}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0027x322eko6ijzh	college-preparatory-english-grade-10	COLLEGE-PREPARATORY-ENGLISH-GRADE-10	College Preparatory English	English	College Preparatory English for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0028x3224knzrsqw	pre-ap-english-grade-10	PRE-AP-ENGLISH-GRADE-10	Pre-AP English	English	Pre-AP English for Grade 10 students. Advanced track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0029x3225bdetuff	chinese-i-chinese-literature-grade-10	CHINESE-I-CHINESE-LITERATURE-GRADE-10	Chinese I (Chinese Literature)	Chinese	Chinese I (Chinese Literature) for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0000x3221tpy93lq	adv-expansive-english-grade-12	ADV-EXPANSIVE-ENGLISH-GRADE-12	Adv. Expansive English	English	Adv. Expansive English for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0001x3220erqj9pm	ap-english-literature-and-composition-grade-12	AP-ENGLISH-LITERATURE-AND-COMPOSITION-GRADE-12	AP English Literature & Composition	English	AP English Literature & Composition for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0002x32201okkq33	chinese-iii-grade-12	CHINESE-III-GRADE-12	Chinese III	Chinese	Chinese III for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0003x322sp2t13hx	chinese-strategy-grade-12	CHINESE-STRATEGY-GRADE-12	Chinese Strategy	Chinese	Chinese Strategy for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0004x3223ukgw4l3	ap-research-grade-12	AP-RESEARCH-GRADE-12	AP Research	Interdisciplinary Studies	AP Research for Grade 12 students. Discussion track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0005x322kyvmh5we	humanities-labs-grade-12	HUMANITIES-LABS-GRADE-12	Humanities Labs	Interdisciplinary Studies	Humanities Labs for Grade 12 students. Discussion track.	{G12}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0006x32203v28ecr	assimilation-and-differences-across-societies-grade-12	ASSIMILATION-AND-DIFFERENCES-ACROSS-SOCIETIES-GRADE-12	Assimilation and Differences Across Societies	Humanities	Assimilation and Differences Across Societies for Grade 12 students. Discussion track.	{G12}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0007x322ye9959yf	cross-cultural-philosophy-and-ethics-grade-12	CROSS-CULTURAL-PHILOSOPHY-AND-ETHICS-GRADE-12	Cross-Cultural Philosophy and Ethics	Humanities	Cross-Cultural Philosophy and Ethics for Grade 12 students. Discussion track.	{G12}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0008x322ls8x1dit	contemporary-china-grade-12	CONTEMPORARY-CHINA-GRADE-12	Contemporary China	Humanities	Contemporary China for Grade 12 students. Discussion track.	{G12}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0009x322hkw6kdwd	general-math-grade-12	GENERAL-MATH-GRADE-12	General Math	Mathematics	General Math for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000ax322nvcev6yf	ap-calculus-ab-grade-12	AP-CALCULUS-AB-GRADE-12	AP Calculus AB	Mathematics	AP Calculus AB for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000bx32228rx0hvk	ap-statistics-grade-12	AP-STATISTICS-GRADE-12	AP Statistics	Mathematics	AP Statistics for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000cx322rgb3q3dr	adv-linear-algebra-and-group-theory-grade-12	ADV-LINEAR-ALGEBRA-AND-GROUP-THEORY-GRADE-12	Adv. Linear Algebra and Group Theory	Mathematics	Adv. Linear Algebra and Group Theory for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000dx3229ds7vl5i	multivariable-calculus-grade-12	MULTIVARIABLE-CALCULUS-GRADE-12	Multivariable Calculus	Mathematics	Multivariable Calculus for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000ex3227cei0iar	pe-grade-12	PE-GRADE-12	PE	Physical Education	PE for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000fx322t7d6lh1s	career-readiness-grade-12	CAREER-READINESS-GRADE-12	Career Readiness	College and Career	Career Readiness for Grade 12 students.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000gx322b5em6j64	ap-cybersecurity-grade-12	AP-CYBERSECURITY-GRADE-12	AP Cybersecurity	Computer Science	AP Cybersecurity for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000hx322hmhi8zmc	adv-further-physics-grade-12	ADV-FURTHER-PHYSICS-GRADE-12	Adv. Further Physics	Physics	Adv. Further Physics for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000ix322g2fg9zes	adv-data-analyze-in-physics-grade-12	ADV-DATA-ANALYZE-IN-PHYSICS-GRADE-12	Adv. Data Analyze in Physics	Physics	Adv. Data Analyze in Physics for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000jx322u24slwvo	adv-introduction-to-modern-astrophysics-grade-12	ADV-INTRODUCTION-TO-MODERN-ASTROPHYSICS-GRADE-12	Adv. Introduction to Modern Astrophysics	Physics	Adv. Introduction to Modern Astrophysics for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000kx3223ij7hpuu	ap-chemistry-grade-12	AP-CHEMISTRY-GRADE-12	AP Chemistry	Chemistry	AP Chemistry for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000lx322pexn7iac	adv-organic-chemistry-grade-12	ADV-ORGANIC-CHEMISTRY-GRADE-12	Adv. Organic Chemistry	Chemistry	Adv. Organic Chemistry for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000mx322d1itbxl6	practical-and-research-chemistry-grade-12	PRACTICAL-AND-RESEARCH-CHEMISTRY-GRADE-12	Practical & Research Chemistry	Chemistry	Practical & Research Chemistry for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000nx322q6ot5wwf	adv-genetic-analysis-grade-12	ADV-GENETIC-ANALYSIS-GRADE-12	Adv. Genetic Analysis	Biology	Adv. Genetic Analysis for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000ox322qwf9g2z8	ap-biology-grade-12	AP-BIOLOGY-GRADE-12	AP Biology	Biology	AP Biology for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000px3222df318io	general-biology-grade-12	GENERAL-BIOLOGY-GRADE-12	General Biology	Biology	General Biology for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002ax322bpvkyv8t	sdp-grade-10	SDP-GRADE-10	SDP	Interdisciplinary Studies	SDP for Grade 10 students. Discussion track.	{G10}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000qx322obdgc9z3	ap-environmental-science-grade-12	AP-ENVIRONMENTAL-SCIENCE-GRADE-12	AP Environmental Science	Biology	AP Environmental Science for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000rx322446o5wrw	ap-macro-economics-grade-12	AP-MACRO-ECONOMICS-GRADE-12	AP Macro-Economics	Economics	AP Macro-Economics for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000sx322houdxx49	ap-human-geography-grade-12	AP-HUMAN-GEOGRAPHY-GRADE-12	AP Human Geography	Humanities	AP Human Geography for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000tx322aepa9fm0	history-of-ideas-revolution-and-change-grade-12	HISTORY-OF-IDEAS-REVOLUTION-AND-CHANGE-GRADE-12	History of Ideas: Revolution and Change	Humanities	History of Ideas: Revolution and Change for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000ux322cpjz85kq	gender-studies-grade-12	GENDER-STUDIES-GRADE-12	Gender Studies	Humanities	Gender Studies for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000vx3224mlkjoya	ap-european-history-grade-12	AP-EUROPEAN-HISTORY-GRADE-12	AP European History	Humanities	AP European History for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002bx3220unst3th	colloquy-grade-10	COLLOQUY-GRADE-10	Colloquy	Interdisciplinary Studies	Colloquy for Grade 10 students. Discussion track.	{G10}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002cx322rmab92oe	ap-pre-calculus-grade-10	AP-PRE-CALCULUS-GRADE-10	AP Pre-Calculus	Mathematics	AP Pre-Calculus for Grade 10 students. Regular track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002dx322yo3sno5p	college-algebra-grade-10	COLLEGE-ALGEBRA-GRADE-10	College Algebra	Mathematics	College Algebra for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002ex322h9xezqb8	pe-grade-10	PE-GRADE-10	PE	Physical Education	PE for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002fx322xgqkpdd3	career-readiness-grade-10	CAREER-READINESS-GRADE-10	Career Readiness	College and Career	Career Readiness for Grade 10 students.	{G10}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002gx3223i2zntwd	general-physics-grade-10	GENERAL-PHYSICS-GRADE-10	General Physics	Physics	General Physics for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002hx322645ez5s4	ap-physics-1-grade-10	AP-PHYSICS-1-GRADE-10	AP Physics 1	Physics	AP Physics 1 for Grade 10 students. Advanced track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002ix32250xi7m49	pre-ap-chemistry-grade-10	PRE-AP-CHEMISTRY-GRADE-10	Pre-AP Chemistry	Chemistry	Pre-AP Chemistry for Grade 10 students. Regular track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002jx322q5d6g023	pre-ap-biology-grade-10	PRE-AP-BIOLOGY-GRADE-10	Pre-AP Biology	Biology	Pre-AP Biology for Grade 10 students. Regular track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002kx322ywftymfy	art-grade-10	ART-GRADE-10	Art	Arts	Art for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002lx322qu3blin6	drama-grade-10	DRAMA-GRADE-10	Drama	Arts	Drama for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002mx32266mrjqqu	music-grade-10	MUSIC-GRADE-10	Music	Arts	Music for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002nx3227sdzgnfj	u-s-history-i-grade-10	U-S-HISTORY-I-GRADE-10	U.S. History I	Humanities	U.S. History I for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002ox322uesqw080	world-history-i-grade-10	WORLD-HISTORY-I-GRADE-10	World History I	Humanities	World History I for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002px322p04o40tt	ap-computer-science-principles-grade-10	AP-COMPUTER-SCIENCE-PRINCIPLES-GRADE-10	AP Computer Science Principles	Computer Science	AP Computer Science Principles for Grade 10 students. Advanced track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002qx322221e3vm9	ap-micro-economics-grade-10	AP-MICRO-ECONOMICS-GRADE-10	AP Micro-Economics	Economics	AP Micro-Economics for Grade 10 students. Advanced track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j002rx322g8k9c89j	pre-ap-psychology-grade-10	PRE-AP-PSYCHOLOGY-GRADE-10	Pre-AP Psychology	Psychology	Pre-AP Psychology for Grade 10 students. Regular track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000wx322jjalh77z	the-anthropology-of-consumption-culture-power-and-transformation-grade-12	THE-ANTHROPOLOGY-OF-CONSUMPTION-CULTURE-POWER-AND-TRANSFORMATION-GRADE-12	The Anthropology of Consumption: Culture, Power, and Transformation	Humanities	The Anthropology of Consumption: Culture, Power, and Transformation for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000xx322trg6saa3	ap-comparative-government-and-politics-grade-12	AP-COMPARATIVE-GOVERNMENT-AND-POLITICS-GRADE-12	AP Comparative Government & Politics	Humanities	AP Comparative Government & Politics for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000yx322fvgedeti	introduction-to-french-language-and-culture-grade-12	INTRODUCTION-TO-FRENCH-LANGUAGE-AND-CULTURE-GRADE-12	Introduction to French Language and Culture	World Languages	Introduction to French Language and Culture for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j000zx322173n2yoz	introduction-to-japanese-language-and-culture-grade-12	INTRODUCTION-TO-JAPANESE-LANGUAGE-AND-CULTURE-GRADE-12	Introduction to Japanese Language and Culture	World Languages	Introduction to Japanese Language and Culture for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0010x322h191hpwc	introduction-to-spanish-language-and-culture-grade-12	INTRODUCTION-TO-SPANISH-LANGUAGE-AND-CULTURE-GRADE-12	Introduction to Spanish Language and Culture	World Languages	Introduction to Spanish Language and Culture for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0011x3221dawdvzx	ap-psychology-grade-12	AP-PSYCHOLOGY-GRADE-12	AP Psychology	Psychology	AP Psychology for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0012x3221ju2bf6q	visual-art-grade-12	VISUAL-ART-GRADE-12	Visual Art	Arts	Visual Art for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0013x322blg8urgs	film-production-grade-12	FILM-PRODUCTION-GRADE-12	Film Production	Arts	Film Production for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0014x322nq3ek68v	ap-art-history-grade-12	AP-ART-HISTORY-GRADE-12	AP Art History	Humanities	AP Art History for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0015x322xmrwedso	architecture-foundation-grade-12	ARCHITECTURE-FOUNDATION-GRADE-12	Architecture Foundation	Arts	Architecture Foundation for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0016x322wpauuwgn	advanced-theatre-grade-12	ADVANCED-THEATRE-GRADE-12	Advanced Theatre	Arts	Advanced Theatre for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0017x322lxkb69lo	music-performance-grade-12	MUSIC-PERFORMANCE-GRADE-12	Music Performance	Arts	Music Performance for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0018x32278bds3ga	adv-english-grade-11	ADV-ENGLISH-GRADE-11	Adv. English	English	Adv. English for Grade 11 students. Advanced track.	{G11}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j0019x322q4zqy9hq	ap-english-language-and-composition-grade-11	AP-ENGLISH-LANGUAGE-AND-COMPOSITION-GRADE-11	AP English Language & Composition	English	AP English Language & Composition for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001ax32252hy58kf	chinese-ii-chinese-literature-grade-11	CHINESE-II-CHINESE-LITERATURE-GRADE-11	Chinese II (Chinese Literature)	Chinese	Chinese II (Chinese Literature) for Grade 11 students. Regular track.	{G11}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001bx322ne8l5dn9	ap-seminar-grade-11	AP-SEMINAR-GRADE-11	AP Seminar	General Studies	AP Seminar for Grade 11 students. Discussion track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001cx322an8b31ty	colloquy-grade-11	COLLOQUY-GRADE-11	Colloquy	Interdisciplinary Studies	Colloquy for Grade 11 students. Discussion track.	{G11}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001dx322ygutfivd	cross-cultural-leadership-program-grade-11	CROSS-CULTURAL-LEADERSHIP-PROGRAM-GRADE-11	Cross-Cultural Leadership Program	Interdisciplinary Studies	Cross-Cultural Leadership Program for Grade 11 students. Discussion track.	{G11}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001ex3227zd1t2wo	ap-calculus-ab-grade-11	AP-CALCULUS-AB-GRADE-11	AP Calculus AB	Mathematics	AP Calculus AB for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001fx322qh47m7qy	ap-calculus-bc-grade-11	AP-CALCULUS-BC-GRADE-11	AP Calculus BC	Mathematics	AP Calculus BC for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001gx3229d2g5yoh	ap-statistics-grade-11	AP-STATISTICS-GRADE-11	AP Statistics	Mathematics	AP Statistics for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001hx322zed0t0nj	pe-grade-11	PE-GRADE-11	PE	Physical Education	PE for Grade 11 students. Regular track.	{G11}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001ix322fr9pylrr	career-readiness-grade-11	CAREER-READINESS-GRADE-11	Career Readiness	College and Career	Career Readiness for Grade 11 students.	{G11}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001jx322zk8ygykp	ap-physics-c-mechanics-grade-11	AP-PHYSICS-C-MECHANICS-GRADE-11	AP Physics C: Mechanics	Physics	AP Physics C: Mechanics for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001kx322528r8khd	ap-physics-c-electricity-and-magnetism-grade-11	AP-PHYSICS-C-ELECTRICITY-AND-MAGNETISM-GRADE-11	AP Physics C: Electricity & Magnetism	Physics	AP Physics C: Electricity & Magnetism for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001lx322k6q3pusa	general-chemistry-grade-11	GENERAL-CHEMISTRY-GRADE-11	General Chemistry	Chemistry	General Chemistry for Grade 11 students. Regular track.	{G11}	GENERAL	None.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
-cmnh2dr9j001mx3221999k6m4	ap-chemistry-grade-11	AP-CHEMISTRY-GRADE-11	AP Chemistry	Chemistry	AP Chemistry for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 05:58:49.927	2026-04-02 05:58:49.927
+cmnh794hr001mx3ovzjr0ogho	ap-chemistry-grade-11	AP-CHEMISTRY-GRADE-11	AP Chemistry	Chemistry	AP Chemistry for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001nx3ovcr4qxs47	ap-biology-grade-11	AP-BIOLOGY-GRADE-11	AP Biology	Biology	AP Biology for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001ox3ov7paafjlm	physiology-and-ecology-grade-11	PHYSIOLOGY-AND-ECOLOGY-GRADE-11	Physiology and Ecology	Biology	Physiology and Ecology for Grade 11 students. Regular track.	{G11}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001px3ovz559d2b8	ap-environmental-science-grade-11	AP-ENVIRONMENTAL-SCIENCE-GRADE-11	AP Environmental Science	Biology	AP Environmental Science for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001qx3ovuaednu0x	ap-studio-art-grade-11	AP-STUDIO-ART-GRADE-11	AP Studio Art	Arts	AP Studio Art for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs001rx3ov4zkdsyt7	ap-art-history-grade-11	AP-ART-HISTORY-GRADE-11	AP Art History	Humanities	AP Art History for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs001sx3ovc9vo8qnw	world-theatre-studies-grade-11	WORLD-THEATRE-STUDIES-GRADE-11	World Theatre Studies	Arts	World Theatre Studies for Grade 11 students. Regular track.	{G11}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs001tx3ovul9ha92c	ap-music-theory-grade-11	AP-MUSIC-THEORY-GRADE-11	AP Music Theory	Arts	AP Music Theory for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs001ux3ovb5s61lr2	united-states-history-ii-grade-11	UNITED-STATES-HISTORY-II-GRADE-11	United States History II	Humanities	United States History II for Grade 11 students. Regular track.	{G11}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs001vx3ovh27lbt8p	world-history-ii-grade-11	WORLD-HISTORY-II-GRADE-11	World History II	Humanities	World History II for Grade 11 students. Regular track.	{G11}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs001wx3ovefpsuuvf	ap-united-states-history-grade-11	AP-UNITED-STATES-HISTORY-GRADE-11	AP United States History	Humanities	AP United States History for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs001xx3ov5xmo6wqu	ap-world-history-grade-11	AP-WORLD-HISTORY-GRADE-11	AP World History	Humanities	AP World History for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs001yx3ov1j7tzhhk	ap-human-geography-grade-11	AP-HUMAN-GEOGRAPHY-GRADE-11	AP Human Geography	Humanities	AP Human Geography for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs001zx3ovl49z5esp	ap-european-history-grade-11	AP-EUROPEAN-HISTORY-GRADE-11	AP European History	Humanities	AP European History for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs0020x3ovp57hpyes	ap-computer-science-a-grade-11	AP-COMPUTER-SCIENCE-A-GRADE-11	AP Computer Science A	Computer Science	AP Computer Science A for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs0021x3ovth93wre3	adv-artificial-intelligence-grade-11	ADV-ARTIFICIAL-INTELLIGENCE-GRADE-11	Adv. Artificial Intelligence	Computer Science	Adv. Artificial Intelligence for Grade 11 students. Advanced track.	{G11}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs0022x3ov2aukabe2	ap-psychology-grade-11	AP-PSYCHOLOGY-GRADE-11	AP Psychology	Psychology	AP Psychology for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs0023x3ovwts6herx	ap-comparative-government-and-politics-grade-11	AP-COMPARATIVE-GOVERNMENT-AND-POLITICS-GRADE-11	AP Comparative Government & Politics	Humanities	AP Comparative Government & Politics for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs0024x3ovvia1uyr3	ap-micro-economics-grade-11	AP-MICRO-ECONOMICS-GRADE-11	AP Micro-Economics	Economics	AP Micro-Economics for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs0025x3ovhnmtpj5u	ap-macro-economics-grade-11	AP-MACRO-ECONOMICS-GRADE-11	AP Macro-Economics	Economics	AP Macro-Economics for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs0026x3ovzw8qjpue	adv-differential-equations-and-graph-theory-grade-11	ADV-DIFFERENTIAL-EQUATIONS-AND-GRAPH-THEORY-GRADE-11	Adv. Differential Equations & Graph Theory	General Studies	Adv. Differential Equations & Graph Theory for Grade 11 students. Advanced track.	{G11}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs0027x3ov42uj5rlu	college-preparatory-english-grade-10	COLLEGE-PREPARATORY-ENGLISH-GRADE-10	College Preparatory English	English	College Preparatory English for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs0028x3ovwue6qtb8	pre-ap-english-grade-10	PRE-AP-ENGLISH-GRADE-10	Pre-AP English	English	Pre-AP English for Grade 10 students. Advanced track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0000x3ovsa8dkyyl	adv-expansive-english-grade-12	ADV-EXPANSIVE-ENGLISH-GRADE-12	Adv. Expansive English	English	Adv. Expansive English for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0001x3ovhcsh42en	ap-english-literature-and-composition-grade-12	AP-ENGLISH-LITERATURE-AND-COMPOSITION-GRADE-12	AP English Literature & Composition	English	AP English Literature & Composition for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0002x3ovv3amkvru	chinese-iii-grade-12	CHINESE-III-GRADE-12	Chinese III	Chinese	Chinese III for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0003x3overuwg6q5	chinese-strategy-grade-12	CHINESE-STRATEGY-GRADE-12	Chinese Strategy	Chinese	Chinese Strategy for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0004x3ov4j6sbx8o	ap-research-grade-12	AP-RESEARCH-GRADE-12	AP Research	Interdisciplinary Studies	AP Research for Grade 12 students. Discussion track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0005x3ovl9cxpinw	humanities-labs-grade-12	HUMANITIES-LABS-GRADE-12	Humanities Labs	Interdisciplinary Studies	Humanities Labs for Grade 12 students. Discussion track.	{G12}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0006x3ovquirfj5j	assimilation-and-differences-across-societies-grade-12	ASSIMILATION-AND-DIFFERENCES-ACROSS-SOCIETIES-GRADE-12	Assimilation and Differences Across Societies	Humanities	Assimilation and Differences Across Societies for Grade 12 students. Discussion track.	{G12}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0007x3ovvqi85re3	cross-cultural-philosophy-and-ethics-grade-12	CROSS-CULTURAL-PHILOSOPHY-AND-ETHICS-GRADE-12	Cross-Cultural Philosophy and Ethics	Humanities	Cross-Cultural Philosophy and Ethics for Grade 12 students. Discussion track.	{G12}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0008x3ovqio99w9t	contemporary-china-grade-12	CONTEMPORARY-CHINA-GRADE-12	Contemporary China	Humanities	Contemporary China for Grade 12 students. Discussion track.	{G12}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0009x3ovkjez4t3h	general-math-grade-12	GENERAL-MATH-GRADE-12	General Math	Mathematics	General Math for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000ax3ovu7gxv9gt	ap-calculus-ab-grade-12	AP-CALCULUS-AB-GRADE-12	AP Calculus AB	Mathematics	AP Calculus AB for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000bx3ovy9naz08l	ap-statistics-grade-12	AP-STATISTICS-GRADE-12	AP Statistics	Mathematics	AP Statistics for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000cx3ovmaqwixt1	adv-linear-algebra-and-group-theory-grade-12	ADV-LINEAR-ALGEBRA-AND-GROUP-THEORY-GRADE-12	Adv. Linear Algebra and Group Theory	Mathematics	Adv. Linear Algebra and Group Theory for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000dx3ovo0d7ug78	multivariable-calculus-grade-12	MULTIVARIABLE-CALCULUS-GRADE-12	Multivariable Calculus	Mathematics	Multivariable Calculus for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000ex3ov4z80p9us	pe-grade-12	PE-GRADE-12	PE	Physical Education	PE for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000fx3ovaxjsyecr	career-readiness-grade-12	CAREER-READINESS-GRADE-12	Career Readiness	College and Career	Career Readiness for Grade 12 students.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000gx3ovea3cqceh	ap-cybersecurity-grade-12	AP-CYBERSECURITY-GRADE-12	AP Cybersecurity	Computer Science	AP Cybersecurity for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000hx3ova32x8v7a	adv-further-physics-grade-12	ADV-FURTHER-PHYSICS-GRADE-12	Adv. Further Physics	Physics	Adv. Further Physics for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000ix3ovw8m7okka	adv-data-analyze-in-physics-grade-12	ADV-DATA-ANALYZE-IN-PHYSICS-GRADE-12	Adv. Data Analyze in Physics	Physics	Adv. Data Analyze in Physics for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000jx3ovqggm21ws	adv-introduction-to-modern-astrophysics-grade-12	ADV-INTRODUCTION-TO-MODERN-ASTROPHYSICS-GRADE-12	Adv. Introduction to Modern Astrophysics	Physics	Adv. Introduction to Modern Astrophysics for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000kx3ovz81f31sx	ap-chemistry-grade-12	AP-CHEMISTRY-GRADE-12	AP Chemistry	Chemistry	AP Chemistry for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000lx3ovvyncqhc2	adv-organic-chemistry-grade-12	ADV-ORGANIC-CHEMISTRY-GRADE-12	Adv. Organic Chemistry	Chemistry	Adv. Organic Chemistry for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000mx3ov27b9equl	practical-and-research-chemistry-grade-12	PRACTICAL-AND-RESEARCH-CHEMISTRY-GRADE-12	Practical & Research Chemistry	Chemistry	Practical & Research Chemistry for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000nx3ovlidfucft	adv-genetic-analysis-grade-12	ADV-GENETIC-ANALYSIS-GRADE-12	Adv. Genetic Analysis	Biology	Adv. Genetic Analysis for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000ox3ovl46eykmk	ap-biology-grade-12	AP-BIOLOGY-GRADE-12	AP Biology	Biology	AP Biology for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000px3ovltvcgxoc	general-biology-grade-12	GENERAL-BIOLOGY-GRADE-12	General Biology	Biology	General Biology for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs0029x3ovyqs30h36	chinese-i-chinese-literature-grade-10	CHINESE-I-CHINESE-LITERATURE-GRADE-10	Chinese I (Chinese Literature)	Chinese	Chinese I (Chinese Literature) for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000qx3ovtm42jr8g	ap-environmental-science-grade-12	AP-ENVIRONMENTAL-SCIENCE-GRADE-12	AP Environmental Science	Biology	AP Environmental Science for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000rx3ov2anx6uo0	ap-macro-economics-grade-12	AP-MACRO-ECONOMICS-GRADE-12	AP Macro-Economics	Economics	AP Macro-Economics for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000sx3ov0mv3dilv	ap-human-geography-grade-12	AP-HUMAN-GEOGRAPHY-GRADE-12	AP Human Geography	Humanities	AP Human Geography for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000tx3ov3lb4f16g	history-of-ideas-revolution-and-change-grade-12	HISTORY-OF-IDEAS-REVOLUTION-AND-CHANGE-GRADE-12	History of Ideas: Revolution and Change	Humanities	History of Ideas: Revolution and Change for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000ux3ovc7dzeq9u	gender-studies-grade-12	GENDER-STUDIES-GRADE-12	Gender Studies	Humanities	Gender Studies for Grade 12 students. Advanced track.	{G12}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000vx3ov06jpq2l4	ap-european-history-grade-12	AP-EUROPEAN-HISTORY-GRADE-12	AP European History	Humanities	AP European History for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000wx3ovpx4rv4dm	the-anthropology-of-consumption-culture-power-and-transformation-grade-12	THE-ANTHROPOLOGY-OF-CONSUMPTION-CULTURE-POWER-AND-TRANSFORMATION-GRADE-12	The Anthropology of Consumption: Culture, Power, and Transformation	Humanities	The Anthropology of Consumption: Culture, Power, and Transformation for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000xx3ov1lu6ezva	ap-comparative-government-and-politics-grade-12	AP-COMPARATIVE-GOVERNMENT-AND-POLITICS-GRADE-12	AP Comparative Government & Politics	Humanities	AP Comparative Government & Politics for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000yx3ovmt1vy03y	introduction-to-french-language-and-culture-grade-12	INTRODUCTION-TO-FRENCH-LANGUAGE-AND-CULTURE-GRADE-12	Introduction to French Language and Culture	World Languages	Introduction to French Language and Culture for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr000zx3ovarl72v1z	introduction-to-japanese-language-and-culture-grade-12	INTRODUCTION-TO-JAPANESE-LANGUAGE-AND-CULTURE-GRADE-12	Introduction to Japanese Language and Culture	World Languages	Introduction to Japanese Language and Culture for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0010x3ov632ah4q7	introduction-to-spanish-language-and-culture-grade-12	INTRODUCTION-TO-SPANISH-LANGUAGE-AND-CULTURE-GRADE-12	Introduction to Spanish Language and Culture	World Languages	Introduction to Spanish Language and Culture for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0011x3ovpm79vpen	ap-psychology-grade-12	AP-PSYCHOLOGY-GRADE-12	AP Psychology	Psychology	AP Psychology for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0012x3ovcu7kl911	visual-art-grade-12	VISUAL-ART-GRADE-12	Visual Art	Arts	Visual Art for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0013x3ovb9ebecfh	film-production-grade-12	FILM-PRODUCTION-GRADE-12	Film Production	Arts	Film Production for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0014x3ovnsy5dvwr	ap-art-history-grade-12	AP-ART-HISTORY-GRADE-12	AP Art History	Humanities	AP Art History for Grade 12 students. Advanced track.	{G12}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0015x3ovih2mlu4o	architecture-foundation-grade-12	ARCHITECTURE-FOUNDATION-GRADE-12	Architecture Foundation	Arts	Architecture Foundation for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0016x3ovq4hnhv2q	advanced-theatre-grade-12	ADVANCED-THEATRE-GRADE-12	Advanced Theatre	Arts	Advanced Theatre for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0017x3ovm9vebk41	music-performance-grade-12	MUSIC-PERFORMANCE-GRADE-12	Music Performance	Arts	Music Performance for Grade 12 students. Regular track.	{G12}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0018x3ov7fuldkj1	adv-english-grade-11	ADV-ENGLISH-GRADE-11	Adv. English	English	Adv. English for Grade 11 students. Advanced track.	{G11}	GENERAL	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr0019x3ovmxop7inx	ap-english-language-and-composition-grade-11	AP-ENGLISH-LANGUAGE-AND-COMPOSITION-GRADE-11	AP English Language & Composition	English	AP English Language & Composition for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001ax3ovwu931exc	chinese-ii-chinese-literature-grade-11	CHINESE-II-CHINESE-LITERATURE-GRADE-11	Chinese II (Chinese Literature)	Chinese	Chinese II (Chinese Literature) for Grade 11 students. Regular track.	{G11}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001bx3ovf0q8llq7	ap-seminar-grade-11	AP-SEMINAR-GRADE-11	AP Seminar	General Studies	AP Seminar for Grade 11 students. Discussion track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001cx3ov3zao8ylb	colloquy-grade-11	COLLOQUY-GRADE-11	Colloquy	Interdisciplinary Studies	Colloquy for Grade 11 students. Discussion track.	{G11}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001dx3ovepe685dl	cross-cultural-leadership-program-grade-11	CROSS-CULTURAL-LEADERSHIP-PROGRAM-GRADE-11	Cross-Cultural Leadership Program	Interdisciplinary Studies	Cross-Cultural Leadership Program for Grade 11 students. Discussion track.	{G11}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001ex3ov7b7yx4u9	ap-calculus-ab-grade-11	AP-CALCULUS-AB-GRADE-11	AP Calculus AB	Mathematics	AP Calculus AB for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001fx3ov20qw0ohn	ap-calculus-bc-grade-11	AP-CALCULUS-BC-GRADE-11	AP Calculus BC	Mathematics	AP Calculus BC for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001gx3ovq1bit7ld	ap-statistics-grade-11	AP-STATISTICS-GRADE-11	AP Statistics	Mathematics	AP Statistics for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001hx3ovo933t58s	pe-grade-11	PE-GRADE-11	PE	Physical Education	PE for Grade 11 students. Regular track.	{G11}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001ix3ovgivdrv74	career-readiness-grade-11	CAREER-READINESS-GRADE-11	Career Readiness	College and Career	Career Readiness for Grade 11 students.	{G11}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001jx3ovkqlhtn7p	ap-physics-c-mechanics-grade-11	AP-PHYSICS-C-MECHANICS-GRADE-11	AP Physics C: Mechanics	Physics	AP Physics C: Mechanics for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001kx3ovxu9muaa4	ap-physics-c-electricity-and-magnetism-grade-11	AP-PHYSICS-C-ELECTRICITY-AND-MAGNETISM-GRADE-11	AP Physics C: Electricity & Magnetism	Physics	AP Physics C: Electricity & Magnetism for Grade 11 students. Advanced track.	{G11}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hr001lx3ov8cbi3i65	general-chemistry-grade-11	GENERAL-CHEMISTRY-GRADE-11	General Chemistry	Chemistry	General Chemistry for Grade 11 students. Regular track.	{G11}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002ax3ovdka3t3jd	sdp-grade-10	SDP-GRADE-10	SDP	Interdisciplinary Studies	SDP for Grade 10 students. Discussion track.	{G10}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002bx3ovrj0aco1r	colloquy-grade-10	COLLOQUY-GRADE-10	Colloquy	Interdisciplinary Studies	Colloquy for Grade 10 students. Discussion track.	{G10}	GENERAL	Participation and seminar-style discussion expected.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002cx3ovy66nhjnv	ap-pre-calculus-grade-10	AP-PRE-CALCULUS-GRADE-10	AP Pre-Calculus	Mathematics	AP Pre-Calculus for Grade 10 students. Regular track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002dx3ov8fgoqhiu	college-algebra-grade-10	COLLEGE-ALGEBRA-GRADE-10	College Algebra	Mathematics	College Algebra for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002ex3ov2hcs5ux5	pe-grade-10	PE-GRADE-10	PE	Physical Education	PE for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002fx3ov49dsi9ps	career-readiness-grade-10	CAREER-READINESS-GRADE-10	Career Readiness	College and Career	Career Readiness for Grade 10 students.	{G10}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002gx3ov0bj1eh8d	general-physics-grade-10	GENERAL-PHYSICS-GRADE-10	General Physics	Physics	General Physics for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002hx3ovb6f1a4cy	ap-physics-1-grade-10	AP-PHYSICS-1-GRADE-10	AP Physics 1	Physics	AP Physics 1 for Grade 10 students. Advanced track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002ix3ovme4sx5js	pre-ap-chemistry-grade-10	PRE-AP-CHEMISTRY-GRADE-10	Pre-AP Chemistry	Chemistry	Pre-AP Chemistry for Grade 10 students. Regular track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002jx3ovw5rcjf89	pre-ap-biology-grade-10	PRE-AP-BIOLOGY-GRADE-10	Pre-AP Biology	Biology	Pre-AP Biology for Grade 10 students. Regular track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002kx3ov28br422j	art-grade-10	ART-GRADE-10	Art	Arts	Art for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002lx3ovh6b0yhac	drama-grade-10	DRAMA-GRADE-10	Drama	Arts	Drama for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002mx3ovi3djk8mf	music-grade-10	MUSIC-GRADE-10	Music	Arts	Music for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002nx3ovpp9rurm6	u-s-history-i-grade-10	U-S-HISTORY-I-GRADE-10	U.S. History I	Humanities	U.S. History I for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002ox3ovh26vwgu9	world-history-i-grade-10	WORLD-HISTORY-I-GRADE-10	World History I	Humanities	World History I for Grade 10 students. Regular track.	{G10}	GENERAL	None.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002px3ovce4nijmd	ap-computer-science-principles-grade-10	AP-COMPUTER-SCIENCE-PRINCIPLES-GRADE-10	AP Computer Science Principles	Computer Science	AP Computer Science Principles for Grade 10 students. Advanced track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002qx3ov3e69dhzb	ap-micro-economics-grade-10	AP-MICRO-ECONOMICS-GRADE-10	AP Micro-Economics	Economics	AP Micro-Economics for Grade 10 students. Advanced track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
+cmnh794hs002rx3ovgzle8nkh	pre-ap-psychology-grade-10	PRE-AP-PSYCHOLOGY-GRADE-10	Pre-AP Psychology	Psychology	Pre-AP Psychology for Grade 10 students. Regular track.	{G10}	AP	Prior coursework or department approval recommended.	2026-04-02 08:15:11.871	2026-04-02 08:15:11.871
 \.
 
 
@@ -721,7 +720,8 @@ COPY public."CourseRequest" (id, "requesterId", "requesterName", "requesterEmail
 --
 
 COPY public."Favorite" (id, "userId", "targetType", "teacherProfileId", "courseId", "targetKey", "createdAt", "guestKey") FROM stdin;
-cmnh2latx000hx330k7doxfyi	\N	TEACHER	cmnh2h75v0001x330ekf3ycvl	\N	TEACHER:cmnh2h75v0001x330ekf3ycvl	2026-04-02 06:04:41.878	f20faad9-fc6c-45c8-942d-04dbad62a3d6
+cmnhhh2pe0001x3zwvrhk7zcm	\N	TEACHER	cmnh7edb30001x3prkrbmx5n1	\N	TEACHER:cmnh7edb30001x3prkrbmx5n1	2026-04-02 13:01:18.962	64e5c53a-5060-4170-bb5f-5f3453ac0a3c
+cmnhip7130001x3yky98mp371	\N	COURSE	\N	cmnh794hs0021x3ovth93wre3	COURSE:cmnh794hs0021x3ovth93wre3	2026-04-02 13:35:37.431	64e5c53a-5060-4170-bb5f-5f3453ac0a3c
 \.
 
 
@@ -730,7 +730,7 @@ cmnh2latx000hx330k7doxfyi	\N	TEACHER	cmnh2h75v0001x330ekf3ycvl	\N	TEACHER:cmnh2h
 --
 
 COPY public."ModerationLog" (id, "moderatorId", action, "targetType", "targetId", details, "createdAt") FROM stdin;
-cmnh2dr2f0018x31mqap2t0xl	user-admin-1	WARN	COMMENT	comment-2	Community privacy reminder added to thread.	2026-04-02 05:58:49.672
+cmnh7945n0018x3obmwe7s1rt	user-admin-1	WARN	COMMENT	comment-2	Community privacy reminder added to thread.	2026-04-02 08:15:11.436
 \.
 
 
@@ -739,8 +739,8 @@ cmnh2dr2f0018x31mqap2t0xl	user-admin-1	WARN	COMMENT	comment-2	Community privacy 
 --
 
 COPY public."Notification" (id, "userId", title, body, href, "isRead", "createdAt") FROM stdin;
-cmnh2dr2e0014x31md0i6zwlv	user-student-1	Your question received a new answer	Dr. Sofia Reyes replied on AP Physics 1.	/courses/ap-physics-1	f	2026-04-02 05:58:49.671
-cmnh2dr2e0015x31mw5bd6zyp	user-student-1	Comment moderation reminder	Community guidelines now appear before posting.	/me/comments	t	2026-04-02 05:58:49.671
+cmnh7945m0014x3oblxyeop8y	user-student-1	Your question received a new answer	Dr. Sofia Reyes replied on AP Physics 1.	/courses/ap-physics-1	f	2026-04-02 08:15:11.435
+cmnh7945m0015x3ob7zunuvvo	user-student-1	Comment moderation reminder	Community guidelines now appear before posting.	/me/comments	t	2026-04-02 08:15:11.435
 \.
 
 
@@ -781,10 +781,6 @@ COPY public."QuestionReplyLike" (id, "userId", "questionReplyId", "createdAt") F
 --
 
 COPY public."Rating" (id, "authorId", "targetType", "teacherProfileId", "courseId", "commentId", "targetKey", dimension, score, "isTeacherSelf", "createdAt", "guestKey") FROM stdin;
-cmnh2iaw00005x330d67nb740	\N	TEACHER	cmnh2h75v0001x330ekf3ycvl	\N	\N	TEACHER:cmnh2h75v0001x330ekf3ycvl	strictness	5	f	2026-04-02 06:02:21.984	a1d42541-4cc9-4017-ac96-9f7d06a4d3e9
-cmnh2iaw00007x330habzp7oe	\N	TEACHER	cmnh2h75v0001x330ekf3ycvl	\N	\N	TEACHER:cmnh2h75v0001x330ekf3ycvl	friendliness	5	f	2026-04-02 06:02:21.984	a1d42541-4cc9-4017-ac96-9f7d06a4d3e9
-cmnh2iaw00009x330t95p15s2	\N	TEACHER	cmnh2h75v0001x330ekf3ycvl	\N	\N	TEACHER:cmnh2h75v0001x330ekf3ycvl	workload	5	f	2026-04-02 06:02:21.984	a1d42541-4cc9-4017-ac96-9f7d06a4d3e9
-cmnh2iaw0000bx330l9t7njnx	\N	TEACHER	cmnh2h75v0001x330ekf3ycvl	\N	\N	TEACHER:cmnh2h75v0001x330ekf3ycvl	teaching-quality	5	f	2026-04-02 06:02:21.984	a1d42541-4cc9-4017-ac96-9f7d06a4d3e9
 \.
 
 
@@ -801,9 +797,9 @@ COPY public."StudentCourseRecord" (id, "profileId", "courseId", "gradeLevel") FR
 --
 
 COPY public."StudentProfile" (id, "userId", "accountName", "privacyNoticeAt", "gradeLevel", "courseSystem", bio, "avatarUrl") FROM stdin;
-student-profile-1	user-student-1	quietlibrary	2026-04-02 05:58:49.646	G11	AP	Interested in physics, economics, and writing-intensive courses.	https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80
-student-profile-2	user-student-2	graphpaper	2026-04-02 05:58:49.65	G12	AL	Prefers organized classes with clear grading and strong feedback loops.	https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80
-cmnh2pf2q000jx330vhz9heu7	cmnh2pf2q000ix330504hg4tr	xike	2026-04-02 06:07:54.001	G11	AP		\N
+student-profile-1	user-student-1	quietlibrary	2026-04-02 08:15:11.397	G11	AP	Interested in physics, economics, and writing-intensive courses.	https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80
+student-profile-2	user-student-2	graphpaper	2026-04-02 08:15:11.403	G12	AL	Prefers organized classes with clear grading and strong feedback loops.	https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80
+cmnhj1if10005x3ykuikjboxj	cmnhj1if10004x3yk5zsiyzu5	yunzhe1234	2026-04-02 13:45:12.06	G11	AP		\N
 \.
 
 
@@ -812,7 +808,7 @@ cmnh2pf2q000jx330vhz9heu7	cmnh2pf2q000ix330504hg4tr	xike	2026-04-02 06:07:54.001
 --
 
 COPY public."TeacherCourse" (id, "teacherId", "courseId", "canEdit") FROM stdin;
-cmnh2h75v0003x330g9toi256	cmnh2h75v0001x330ekf3ycvl	cmnh2dr9j000ox322qwf9g2z8	t
+cmnh7edb30003x3pr10n8z441	cmnh7edb30001x3prkrbmx5n1	cmnh794hs001rx3ov4zkdsyt7	t
 \.
 
 
@@ -821,7 +817,7 @@ cmnh2h75v0003x330g9toi256	cmnh2h75v0001x330ekf3ycvl	cmnh2dr9j000ox322qwf9g2z8	t
 --
 
 COPY public."TeacherProfile" (id, "userId", "displayName", department, "subjectArea", "shortBio", "teachingStyle", "avatarUrl", "officeHours", "courseHighlights") FROM stdin;
-cmnh2h75v0001x330ekf3ycvl	cmnh2h75v0000x330xtaiidyr	HanLi	Unassigned	Unassigned			\N	\N	\N
+cmnh7edb30001x3prkrbmx5n1	cmnh7edb30000x3prkab49zb5	Oliver Jin	Unassigned	Unassigned	上劳金的课你摸鱼了吗？		\N	\N	\N
 \.
 
 
@@ -830,11 +826,11 @@ cmnh2h75v0001x330ekf3ycvl	cmnh2h75v0000x330xtaiidyr	HanLi	Unassigned	Unassigned	
 --
 
 COPY public."User" (id, email, "passwordHash", role, language, "isTeacherVerified", "createdAt", "updatedAt") FROM stdin;
-user-student-1	maya@wlselect.edu	$2a$12$XupJMooyHyw.aNhTBkLfWedSgCqOL9u8FGncpFm/LhZz0J.AZTQ5e	STUDENT	en	f	2026-04-02 05:58:49.648	2026-04-02 05:58:49.648
-user-student-2	liam@wlselect.edu	$2a$12$XupJMooyHyw.aNhTBkLfWedSgCqOL9u8FGncpFm/LhZz0J.AZTQ5e	STUDENT	zh	f	2026-04-02 05:58:49.651	2026-04-02 05:58:49.651
-user-admin-1	admin@wlselect.edu	$2a$12$XupJMooyHyw.aNhTBkLfWedSgCqOL9u8FGncpFm/LhZz0J.AZTQ5e	ADMIN	en	f	2026-04-02 05:58:49.654	2026-04-02 05:58:49.654
-cmnh2h75v0000x330xtaiidyr	hanli.2f6aab36-4e18-4c70-adb4-515483f4c444@wlselect.local	__teacher_name_login__	TEACHER	en	f	2026-04-02 06:01:30.499	2026-04-02 06:01:30.499
-cmnh2pf2q000ix330504hg4tr	wendyhu2026@outlook.com	$2a$12$LciNTelvfrUl6zHCV/dfwOLMCqRHWFmp4DhF6kwtYu5gZG88r73tG	STUDENT	zh	f	2026-04-02 06:07:54.002	2026-04-02 06:07:54.002
+user-student-1	maya@wlselect.edu	$2a$12$XShQcpo1VNAAZHcq9hna/u8C2Z/dwGtdGCyuVHsYhqLZ1utqsCNbq	STUDENT	en	f	2026-04-02 08:15:11.399	2026-04-02 08:15:11.399
+user-student-2	liam@wlselect.edu	$2a$12$XShQcpo1VNAAZHcq9hna/u8C2Z/dwGtdGCyuVHsYhqLZ1utqsCNbq	STUDENT	zh	f	2026-04-02 08:15:11.403	2026-04-02 08:15:11.403
+user-admin-1	admin@wlselect.edu	$2a$12$XShQcpo1VNAAZHcq9hna/u8C2Z/dwGtdGCyuVHsYhqLZ1utqsCNbq	ADMIN	en	f	2026-04-02 08:15:11.409	2026-04-02 08:15:11.409
+cmnh7edb30000x3prkab49zb5	oliver.jin.bf9a5265-8996-41b2-a018-5db2415b5da3@wlselect.local	__teacher_name_login__	TEACHER	zh	f	2026-04-02 08:19:16.576	2026-04-02 08:19:16.576
+cmnhj1if10004x3yk5zsiyzu5	m18396870715@gmail.com	$2a$12$jO3K.uVSoVHMHIWyrXeRkuvBVwEhnccI6ox8NkaDIdSDjR8DnFcn6	STUDENT	zh	f	2026-04-02 13:45:12.061	2026-04-02 13:45:12.061
 \.
 
 
@@ -1406,5 +1402,5 @@ ALTER TABLE ONLY public."TeacherProfile"
 -- PostgreSQL database dump complete
 --
 
-\unrestrict gY33LEHZC2IL1kycLB8Rs0Y1mFo4ugkL28Eb72sDrxYqL5HLJ3eWBxFbaFZZbMM
+\unrestrict cvYivb1fTk1IKtNgiUiXuN8TRdocwJdGomgsICjIQQwRecVHnW1PO5u8ARqS7Cn
 

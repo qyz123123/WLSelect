@@ -3,6 +3,7 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { isGuestNameAllowed } from "@/lib/guest-name";
+import { writeGuestIdentityCookie } from "@/lib/identity-cookie-client";
 import { AppUser, IdentityState } from "@/lib/types";
 
 const STORAGE_KEY = "wlselect-identity";
@@ -89,14 +90,17 @@ export function IdentityProvider({
 
   useEffect(() => {
     if (!hydrated || viewer) {
+      writeGuestIdentityCookie(undefined);
       return;
     }
 
     if (!identity.selectedRole) {
+      writeGuestIdentityCookie(undefined);
       window.localStorage.removeItem(STORAGE_KEY);
       return;
     }
 
+    writeGuestIdentityCookie(identity.selectedRole === "student" ? identity.guestKey : undefined);
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(identity));
   }, [hydrated, identity, viewer]);
 

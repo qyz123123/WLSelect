@@ -262,8 +262,8 @@ export async function getCurrentUser(userId: string) {
   return user ? mapAppUser(user) : null;
 }
 
-export async function getTeachers(viewerId?: string) {
-  const favorites = await getFavoriteKeySet(viewerId);
+export async function getTeachers(viewerId?: string, guestKey?: string) {
+  const favorites = await getFavoriteKeySet(viewerId, guestKey);
   const teachers = await prisma.teacherProfile.findMany({
     include: {
       user: {
@@ -1200,8 +1200,8 @@ export async function searchAll(query: string) {
   };
 }
 
-export async function getBrowseTeachers(filters?: { subject?: string; system?: string; viewerId?: string }) {
-  const teachers = await getTeachers(filters?.viewerId);
+export async function getBrowseTeachers(filters?: { subject?: string; system?: string; viewerId?: string; guestKey?: string }) {
+  const teachers = await getTeachers(filters?.viewerId, filters?.guestKey);
 
   return teachers.filter((teacher) => {
     const subjectMatches = filters?.subject
@@ -1214,8 +1214,8 @@ export async function getBrowseTeachers(filters?: { subject?: string; system?: s
   });
 }
 
-export async function getBrowseCourses(filters?: { grade?: string; system?: string; viewerId?: string }) {
-  const courses = await getCourses(filters?.viewerId);
+export async function getBrowseCourses(filters?: { grade?: string; system?: string; viewerId?: string; guestKey?: string }) {
+  const courses = await getCourses(filters?.viewerId, filters?.guestKey);
 
   return courses.filter((course) => {
     const gradeMatches = filters?.grade ? course.gradeLevels.includes(filters.grade as Course["gradeLevels"][number]) : true;

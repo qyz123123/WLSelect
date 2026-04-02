@@ -1,6 +1,6 @@
 import { CourseSystem, Locale } from "@/lib/types";
 
-export const defaultLocale: Locale = "en";
+export const defaultLocale: Locale = "zh";
 
 export const dictionary = {
   en: {
@@ -43,8 +43,8 @@ export const dictionary = {
     savedState: "Saved",
     savedTeachers: "Saved teachers",
     savedCourses: "Saved courses",
-    browseTeachers: "Browse / create teachers",
-    browseCourses: "Browse courses",
+    browseTeachers: "I want to choose a teacher and start roasting",
+    browseCourses: "I want to choose a course and start roasting",
     postDirectly: "Post directly",
     viewProfile: "View profile",
     exploreCourse: "Explore course",
@@ -171,8 +171,8 @@ export const dictionary = {
     savedState: "已收藏",
     savedTeachers: "收藏的教师",
     savedCourses: "收藏的课程",
-    browseTeachers: "浏览 / 创建教师",
-    browseCourses: "浏览课程",
+    browseTeachers: "选择老师开始吐槽",
+    browseCourses: "选择课程开始吐槽",
     postDirectly: "直接发评论",
     viewProfile: "查看资料",
     exploreCourse: "查看课程",

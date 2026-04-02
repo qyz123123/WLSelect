@@ -20,6 +20,13 @@ function optionalEmailSchema() {
   );
 }
 
+const signupNameSchema = z
+  .string()
+  .transform((value) => value.trim())
+  .refine((value) => value.length > 0, {
+    message: "Name is required."
+  });
+
 function buildTeacherPlaceholderEmail(name: string) {
   const slug = name
     .trim()
@@ -34,7 +41,7 @@ const studentSignupSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   role: z.literal("student"),
-  name: z.string().min(2).max(50),
+  name: signupNameSchema,
   language: z.enum(["en", "zh"]).default("en"),
   gradeLevel: z.enum(["G9", "G10", "G11", "G12"]).optional(),
   system: z.enum(["AP", "AL"]).optional()
@@ -43,7 +50,7 @@ const studentSignupSchema = z.object({
 const teacherSignupSchema = z.object({
   email: optionalEmailSchema(),
   role: z.literal("teacher"),
-  name: z.string().min(2).max(80),
+  name: signupNameSchema,
   language: z.enum(["en", "zh"]).default("en"),
   department: z.string().max(80).optional(),
   subjectArea: z.string().max(80).optional(),

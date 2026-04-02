@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { use, useState } from "react";
+import { Pencil } from "lucide-react";
 
 import { Card } from "@/components/card";
 import { CommentThread } from "@/components/comment-thread";
@@ -14,6 +15,7 @@ import { RatingSummary } from "@/components/rating-summary";
 import { RoleBadge } from "@/components/role-badge";
 import { SectionHeading } from "@/components/section-heading";
 import { useApiData } from "@/hooks/use-api-data";
+import { useViewer } from "@/components/viewer-provider";
 import { teacherRatingDimensions } from "@/lib/ratings";
 import { AppUser, Comment, Question, TeacherProfile } from "@/lib/types";
 
@@ -21,7 +23,12 @@ export default function TeacherDetailPage({ params }: { params: Promise<{ id: st
   const { id } = use(params);
   const { copy, locale } = useLocale();
   const { identity } = useIdentity();
+  const initialViewer = useViewer();
   const [refreshNonce, setRefreshNonce] = useState(0);
+  const [editingBio, setEditingBio] = useState(false);
+  const [bioDraft, setBioDraft] = useState("");
+  const [bioSubmitting, setBioSubmitting] = useState(false);
+  const [bioError, setBioError] = useState<string | null>(null);
   const detailUrl = `/api/teachers/${id}?r=${refreshNonce}${identity.guestKey ? `&guestKey=${encodeURIComponent(identity.guestKey)}` : ""}`;
   const { data, loading, error, setData } = useApiData<{
     viewer: AppUser | null;
@@ -44,6 +51,52 @@ export default function TeacherDetailPage({ params }: { params: Promise<{ id: st
   }
 
   const comments = data?.comments ?? [];
+  const viewer = data?.viewer ?? initialViewer;
+  const canEditBio = viewer?.role === "student" || identity.selectedRole === "student";
+
+  async function saveBio() {
+    if (!teacher) {
+      return;
+    }
+
+    setBioSubmitting(true);
+    setBioError(null);
+
+    try {
+      const response = await fetch(`/api/teachers/${teacher.id}/bio`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          bio: bioDraft.trim()
+        })
+      });
+
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setBioError(payload?.error ?? (locale === "zh" ? "更新简介失败。" : "Unable to update the bio."));
+        return;
+      }
+
+      const nextBio = payload?.bio ?? bioDraft.trim();
+      setData((current) =>
+        current
+          ? {
+              ...current,
+              teacher: {
+                ...current.teacher,
+                bio: nextBio
+              }
+            }
+          : current
+      );
+      setEditingBio(false);
+    } finally {
+      setBioSubmitting(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -68,6 +121,50 @@ export default function TeacherDetailPage({ params }: { params: Promise<{ id: st
       />
       <div className="grid gap-6 2xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="space-y-6">
+          <Card>
+            <SectionHeading
+              title={locale === "zh" ? "老师简介" : "Teacher bio"}
+              action={
+                canEditBio ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBioDraft(teacher.bio);
+                      setBioError(null);
+                      setEditingBio((current) => !current);
+                    }}
+                    className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-4 py-2 text-sm font-semibold transition hover:bg-[var(--surface-alt)]"
+                  >
+                    <Pencil className="h-4 w-4" />
+                    {editingBio ? (locale === "zh" ? "取消编辑" : "Cancel") : locale === "zh" ? "编辑 bio" : "Edit bio"}
+                  </button>
+                ) : null
+              }
+            />
+            {editingBio ? (
+              <div className="mt-2 space-y-4">
+                <textarea
+                  rows={5}
+                  value={bioDraft}
+                  onChange={(event) => setBioDraft(event.target.value)}
+                  className="w-full rounded-3xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)]"
+                />
+                {bioError ? <div className="text-sm text-[var(--danger)]">{bioError}</div> : null}
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => void saveBio()}
+                    disabled={bioSubmitting}
+                    className="rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                  >
+                    {bioSubmitting ? (locale === "zh" ? "保存中..." : "Saving...") : locale === "zh" ? "保存 bio" : "Save bio"}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm leading-7 text-[var(--muted)]">{teacher.bio || (locale === "zh" ? "暂无简介。" : "No bio yet.")}</p>
+            )}
+          </Card>
           <Card>
             <SectionHeading title={copy.ratings} description={locale === "zh" ? "学生评分与教师自评分开显示。" : "Student ratings and teacher self-ratings are clearly separated."} />
             <RatingSummary ratings={teacher.ratings} />

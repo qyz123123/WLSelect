@@ -25,6 +25,8 @@ export function CommentThread({
   const router = useRouter();
   const [items, setItems] = useState(comments);
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
+  const [replyErrors, setReplyErrors] = useState<Record<string, string>>({});
+  const [openReplyEditors, setOpenReplyEditors] = useState<Record<string, boolean>>({});
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
   const [guestSuggestion, setGuestSuggestion] = useState(identity.guestDisplayName ?? "");
   const [guestLoading, setGuestLoading] = useState(false);
@@ -144,6 +146,10 @@ export function CommentThread({
   async function submitReply(commentId: string) {
     const body = replyDrafts[commentId]?.trim();
     if (!body) {
+      setReplyErrors((current) => ({
+        ...current,
+        [commentId]: locale === "zh" ? "请输入回复内容。" : "Please enter a reply."
+      }));
       return;
     }
 
@@ -177,10 +183,17 @@ export function CommentThread({
     });
 
     if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      setReplyErrors((current) => ({
+        ...current,
+        [commentId]: payload?.error ?? (locale === "zh" ? "回复失败，请重试。" : "Unable to post the reply. Please try again.")
+      }));
       return;
     }
 
     setReplyDrafts((current) => ({ ...current, [commentId]: "" }));
+    setReplyErrors((current) => ({ ...current, [commentId]: "" }));
+    setOpenReplyEditors((current) => ({ ...current, [commentId]: false }));
     onMutated?.();
     router.refresh();
   }
@@ -223,8 +236,8 @@ export function CommentThread({
               {comment.visibility === "PUBLIC_AND_TEACHER" ? copy.visibleToTeacher : copy.publicOnly}
             </div>
           </div>
-          {showBody ? <p className="mt-4 text-sm leading-6 text-[var(--foreground)]">{comment.body}</p> : null}
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
+          {showBody ? <p className="mt-3 text-sm leading-6 text-[var(--foreground)]">{comment.body}</p> : null}
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
             <button
               type="button"
               onClick={() => void toggleLike(comment.id)}
@@ -237,6 +250,16 @@ export function CommentThread({
               <MessageSquareText className="h-4 w-4" />
               {locale === "zh" ? `${comment.replies.length}${copy.replies}` : `${comment.replies.length} ${copy.replies}`}
             </span>
+            {canReply || identity.selectedRole === "student" ? (
+              <button
+                type="button"
+                onClick={() => setOpenReplyEditors((current) => ({ ...current, [comment.id]: !current[comment.id] }))}
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white px-3 py-1.5 text-sm font-medium"
+              >
+                <MessageSquareText className="h-4 w-4" />
+                {copy.reply}
+              </button>
+            ) : null}
             {comment.targetHref ? (
               <Link
                 href={comment.targetHref}
@@ -248,37 +271,50 @@ export function CommentThread({
             ) : null}
           </div>
           {comment.replies.length > 0 ? (
-            <div className="mt-4 space-y-3 rounded-3xl bg-[var(--surface-alt)] p-4">
+            <div className="mt-3 space-y-2 border-l border-[var(--border)] pl-3">
               {comment.replies.map((reply) => (
-                <div key={reply.id} className="rounded-2xl bg-white px-4 py-3">
+                <div key={reply.id} className="px-3 py-2">
                   <div className="text-xs font-semibold text-[var(--muted)]">{reply.authorName}</div>
-                  <p className="mt-2 text-sm leading-6">{reply.body}</p>
+                  <p className="mt-1.5 text-sm leading-6">{reply.body}</p>
                 </div>
               ))}
             </div>
           ) : null}
-          {canReply || identity.selectedRole === "student" ? (
-            <div className="mt-4 rounded-3xl bg-[var(--surface-alt)] p-4">
-              <textarea
-                rows={3}
-                value={replyDrafts[comment.id] ?? ""}
-                onChange={(event) =>
-                  setReplyDrafts((current) => ({
-                    ...current,
-                    [comment.id]: event.target.value
-                  }))
-                }
-                placeholder={copy.writeReplyPlaceholder}
-                className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none"
-              />
-              <div className="mt-3 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => void submitReply(comment.id)}
-                  className="rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white"
-                >
-                  {copy.reply}
-                </button>
+          {(canReply || identity.selectedRole === "student") && openReplyEditors[comment.id] ? (
+            <div className="mt-3">
+              <div className="rounded-3xl bg-[var(--surface-alt)] p-3">
+                <textarea
+                  rows={3}
+                  value={replyDrafts[comment.id] ?? ""}
+                  onChange={(event) =>
+                    {
+                      setReplyDrafts((current) => ({
+                        ...current,
+                        [comment.id]: event.target.value
+                      }));
+                      setReplyErrors((current) => ({ ...current, [comment.id]: "" }));
+                    }
+                  }
+                  placeholder={copy.writeReplyPlaceholder}
+                  className="w-full rounded-2xl border border-[var(--border)] bg-white px-4 py-3 text-sm outline-none"
+                />
+                {replyErrors[comment.id] ? <div className="mt-3 text-sm text-[var(--danger)]">{replyErrors[comment.id]}</div> : null}
+                <div className="mt-3 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setOpenReplyEditors((current) => ({ ...current, [comment.id]: false }))}
+                    className="rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold"
+                  >
+                    {locale === "zh" ? "取消" : "Cancel"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void submitReply(comment.id)}
+                    className="rounded-full bg-[var(--primary)] px-4 py-2 text-sm font-semibold text-white"
+                  >
+                    {copy.reply}
+                  </button>
+                </div>
               </div>
             </div>
           ) : null}

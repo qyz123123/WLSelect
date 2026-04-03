@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { Card } from "@/components/card";
@@ -16,12 +17,13 @@ export default function SearchPage() {
   const { copy, locale } = useLocale();
   const searchParams = useSearchParams();
   const query = searchParams.get("q") ?? "";
+  const [refreshNonce, setRefreshNonce] = useState(0);
   const { data, loading, error } = useApiData<{
     teachers: TeacherProfile[];
     courses: Course[];
     comments: Comment[];
     questions: Question[];
-  }>(`/api/search?q=${encodeURIComponent(query)}`);
+  }>(`/api/search?q=${encodeURIComponent(query)}&r=${refreshNonce}`);
 
   return (
     <div className="space-y-6">
@@ -49,7 +51,11 @@ export default function SearchPage() {
           </section>
           <section className="space-y-4">
             <SectionHeading title={copy.comments} />
-            {data.comments.length > 0 ? <CommentThread comments={data.comments} /> : <Card>{copy.noCommentsMatched}</Card>}
+            {data.comments.length > 0 ? (
+              <CommentThread comments={data.comments} onMutated={() => setRefreshNonce((current) => current + 1)} />
+            ) : (
+              <Card>{copy.noCommentsMatched}</Card>
+            )}
           </section>
           <section className="space-y-4">
             <SectionHeading title={copy.questions} />

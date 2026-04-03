@@ -54,12 +54,32 @@ select {
   font: inherit;
 }
 
+.topbar-text {
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 600;
+}
+
 .card-surface {
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid var(--border);
   box-shadow: 0 18px 40px rgba(17, 38, 63, 0.06);
+  border-radius: 3px;
 }
 
 .soft-ring {
   box-shadow: 0 0 0 4px rgba(10, 102, 194, 0.12);
+}
+
+/* Tone down the app's default roundness without flattening avatars or tiny status dots. */
+:where(.rounded-\[32px\], .rounded-\[28px\], .rounded-\[24px\], .rounded-3xl) {
+  border-radius: 3px !important;
+}
+
+:where(.rounded-\[20px\], .rounded-2xl, .rounded-xl) {
+  border-radius: 2px !important;
+}
+
+:where(button, a, label, div, span):where(.rounded-full) {
+  border-radius: 3px !important;
 }

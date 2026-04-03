@@ -236,7 +236,7 @@ export function RightRail({
   return (
     <div className="space-y-4">
       {variant === "no-trending" ? null : (
-        <section className="card-surface rounded-[28px] p-5">
+        <section className="card-surface rounded-[28px] p-4">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-semibold">{copy.trending}</h2>
             <span className="text-xs text-[var(--muted)]">{copy.starred}</span>
@@ -264,14 +264,14 @@ export function RightRail({
                       router.push(`/teachers/${teacher.id}`);
                     }
                   }}
-                  className="cursor-pointer rounded-2xl bg-[var(--surface-alt)] px-3 py-3 transition hover:bg-[var(--primary-soft)]"
+                  className="cursor-pointer rounded-2xl bg-[var(--surface-alt)] px-3 py-2.5 transition hover:bg-[var(--primary-soft)]"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <Link href={`/teachers/${teacher.id}`} className="flex min-w-0 items-center gap-3">
-                      <div className={`inline-flex shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${rankBadge.className}`}>
+                      <div className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${rankBadge.className}`}>
                         {rankBadge.label}
                       </div>
-                      <img src={teacher.avatar} alt={teacher.name} className="h-9 w-9 rounded-full object-cover" />
+                      <img src={teacher.avatar} alt={teacher.name} className="h-8 w-8 rounded-full object-cover" />
                       <div className="min-w-0 truncate text-sm font-semibold">{teacher.name}</div>
                     </Link>
                     <div className="shrink-0 text-xs text-[var(--muted)]">
@@ -323,11 +323,11 @@ export function RightRail({
                       router.push(`/courses/${course.slug}`);
                     }
                   }}
-                  className="cursor-pointer rounded-2xl bg-[var(--surface-alt)] px-3 py-3 transition hover:bg-[var(--primary-soft)]"
+                  className="cursor-pointer rounded-2xl bg-[var(--surface-alt)] px-3 py-2.5 transition hover:bg-[var(--primary-soft)]"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <Link href={`/courses/${course.slug}`} className="flex min-w-0 items-center gap-3">
-                      <div className={`inline-flex shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${rankBadge.className}`}>
+                      <div className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${rankBadge.className}`}>
                         {rankBadge.label}
                       </div>
                       <div className="min-w-0 truncate text-sm font-semibold">{course.name}</div>
@@ -368,7 +368,7 @@ export function RightRail({
         </section>
       )}
       {variant === "full" && showGuestHomeCard ? (
-        <section className="card-surface rounded-[28px] p-5">
+        <section className="card-surface rounded-[28px] p-4">
           <div className="text-sm font-semibold text-[var(--foreground)]">{copy.joinCommunity}</div>
           <p className="mt-4 text-sm leading-6 text-[var(--muted)]">{copy.privacyWarning}</p>
           <div className="mt-5 flex gap-3">
@@ -382,7 +382,7 @@ export function RightRail({
         </section>
       ) : null}
       {variant === "full" && user ? (
-        <section className="card-surface rounded-[28px] p-5">
+        <section className="card-surface rounded-[28px] p-4">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-semibold">{copy.notifications}</h2>
             <RoleBadge role={user.role} verified={user.teacherVerified} />

@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { getTargetDetailPath } from "@/lib/route-paths";
 
 const schema = z.object({
-  body: z.string().min(2).max(2000),
+  body: z.string().trim().min(1).max(2000),
   guest: guestIdentitySchema.optional()
 });
 

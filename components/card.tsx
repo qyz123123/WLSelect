@@ -11,7 +11,7 @@ export function Card({
   children: ReactNode;
 } & ComponentPropsWithoutRef<"section">) {
   return (
-    <section className={cn("card-surface rounded-[28px] p-5", className)} {...props}>
+    <section className={cn("card-surface rounded-[28px] p-3", className)} {...props}>
       {children}
     </section>
   );

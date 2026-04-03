@@ -28,8 +28,8 @@ export function Sidebar({ viewer }: { viewer: AppUser | null }) {
 
   return (
     <>
-      <aside className="card-surface rounded-[24px] p-3 xl:hidden">
-        <nav className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <aside className="card-surface rounded-[24px] p-2.5 xl:hidden">
+        <nav className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -39,7 +39,7 @@ export function Sidebar({ viewer }: { viewer: AppUser | null }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex min-w-0 items-center justify-center gap-2 rounded-2xl px-3 py-3 text-center text-sm font-medium transition",
+                  "flex min-w-0 items-center justify-center gap-2 rounded-2xl px-3 py-2.5 text-center text-sm font-medium transition",
                   active
                     ? "bg-[var(--primary-soft)] text-[var(--primary)]"
                     : "text-[var(--muted)] hover:bg-[var(--surface-alt)] hover:text-[var(--foreground)]"

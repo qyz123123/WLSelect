@@ -37,34 +37,34 @@ export function IdentityGate({
   function renderOverlayCard() {
     if (!identity.selectedRole) {
       return (
-        <Card className="overflow-hidden border border-[var(--border)] bg-white/95 p-8 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur md:p-10">
-          <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+        <Card className="overflow-hidden border border-[var(--border)] bg-white/95 p-6 shadow-[0_30px_90px_rgba(15,23,42,0.12)] backdrop-blur md:p-7">
+          <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-[var(--primary-soft)]">
-                <img src="/favicon.ico" alt="WLSelect" className="h-10 w-10 object-contain" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-[var(--primary-soft)]">
+                <img src="/favicon.ico" alt="WLSelect" className="h-8 w-8 object-contain" />
               </div>
               <div>
-                <div className="text-3xl font-semibold tracking-tight text-[var(--foreground)]">WLSelect</div>
+                <div className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">WLSelect</div>
               </div>
             </div>
             <div className="self-start">
               <LanguageSwitcher />
             </div>
           </div>
-          <div className="mt-8 max-w-4xl">
-            <h1 className="text-4xl font-semibold tracking-tight text-[var(--foreground)] md:text-[3.5rem]">
+          <div className="mt-6 max-w-4xl">
+            <h1 className="text-[2.2rem] font-semibold tracking-tight text-[var(--foreground)] md:text-[3rem]">
               {locale === "zh" ? "你是？" : "Who are you?"}
             </h1>
           </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-2">
+          <div className="mt-7 grid gap-4 md:grid-cols-2">
             <button
               type="button"
               onClick={selectTeacher}
-              className="rounded-[32px] border border-[var(--border)] bg-white p-7 text-left shadow-sm transition hover:border-[var(--primary)] hover:bg-[var(--primary-soft)]"
+              className="rounded-[32px] border border-[var(--border)] bg-white p-5 text-left shadow-sm transition hover:border-[var(--primary)] hover:bg-[var(--primary-soft)]"
             >
-              <UserRoundCog className="h-9 w-9 text-[var(--primary)]" />
-              <div className="mt-8 text-[2rem] font-semibold tracking-tight text-[var(--foreground)]">{copy.teacher}</div>
-              <p className="mt-5 text-base leading-8 text-[var(--muted)]">
+              <UserRoundCog className="h-7 w-7 text-[var(--primary)]" />
+              <div className="mt-6 text-[1.6rem] font-semibold tracking-tight text-[var(--foreground)]">{copy.teacher}</div>
+              <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
                 {locale === "zh"
                   ? "可自由创建教师，并通过姓名登录来管理教师资料、授课课程与通知。"
                   : "Create teachers freely, then use the name to sign in and manage teacher profile, taught courses, and notifications."}
@@ -73,11 +73,11 @@ export function IdentityGate({
             <button
               type="button"
               onClick={selectStudent}
-              className="rounded-[32px] border border-[var(--border)] bg-white p-7 text-left shadow-sm transition hover:border-[var(--primary)] hover:bg-[var(--primary-soft)]"
+              className="rounded-[32px] border border-[var(--border)] bg-white p-5 text-left shadow-sm transition hover:border-[var(--primary)] hover:bg-[var(--primary-soft)]"
             >
-              <GraduationCap className="h-9 w-9 text-[var(--primary)]" />
-              <div className="mt-8 text-[2rem] font-semibold tracking-tight text-[var(--foreground)]">{copy.student}</div>
-              <div className="mt-6 text-base font-semibold text-[#d84b17]">
+              <GraduationCap className="h-7 w-7 text-[var(--primary)]" />
+              <div className="mt-6 text-[1.6rem] font-semibold tracking-tight text-[var(--foreground)]">{copy.student}</div>
+              <div className="mt-4 text-sm font-semibold text-[#d84b17]">
                 {locale === "zh" ? "非强制登录，我们保护你的隐私" : "Login is optional. We protect your privacy."}
               </div>
             </button>

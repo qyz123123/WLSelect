@@ -20,13 +20,13 @@ export function RoleBadge({ role, verified }: { role: Role; verified?: boolean }
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium",
         role === "student" && "bg-slate-100 text-slate-700",
         role === "teacher" && "bg-sky-100 text-sky-800",
         role === "admin" && "bg-amber-100 text-amber-800"
       )}
     >
-      <Icon className="h-3.5 w-3.5" />
+      <Icon className="h-3 w-3" />
       {role === "student" ? copy.student : role === "teacher" ? copy.teacher : copy.admin}
       {verified ? " • Verified" : ""}
     </span>

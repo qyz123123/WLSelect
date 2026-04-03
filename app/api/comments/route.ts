@@ -70,7 +70,7 @@ export async function POST(request: Request) {
   const guestKey = isGuestStudent ? parsed.data.guest!.guestKey : null;
   const trimmedBody = parsed.data.body.trim();
   const title = parsed.data.title.trim() || trimmedBody.slice(0, 120) || "Comment";
-  const duplicateWindowStart = new Date(Date.now() - 10 * 60 * 1000);
+  const duplicateWindowStart = new Date(Date.now() - 5 * 1000);
 
   const duplicateComment = await prisma.comment.findFirst({
     where: {

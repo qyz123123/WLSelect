@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ArrowRight } from "lucide-react";
 
 import { Card } from "@/components/card";
@@ -19,10 +19,11 @@ export default function HomePage() {
   const { copy, locale } = useLocale();
   const shellData = useShellData();
   const initialViewer = useViewer();
+  const [refreshNonce, setRefreshNonce] = useState(0);
   const { data, loading } = useApiData<{
     currentUser: AppUser | null;
     feedItems: FeedItem[];
-  }>("/api/bootstrap");
+  }>(`/api/bootstrap?r=${refreshNonce}`);
 
   const latestComments = useMemo(
     () => (data?.feedItems.filter((item) => item.kind === "comment").map((item) => item.payload as Comment) ?? []),
@@ -55,10 +56,10 @@ export default function HomePage() {
   if (isStudentHome) {
     return (
       <div className="space-y-6">
-        <Card className="overflow-hidden bg-[radial-gradient(circle_at_top_right,_rgba(10,102,194,0.15),_transparent_30%),_white] p-7 md:p-8">
+        <Card className="overflow-hidden bg-[radial-gradient(circle_at_top_right,_rgba(10,102,194,0.15),_transparent_30%),_white] p-5 pl-6 md:p-6 md:pl-6">
           <div className="space-y-8">
             <div className="max-w-5xl">
-              <h1 className="max-w-4xl text-[2.9rem] leading-[0.98] font-semibold tracking-tight text-[var(--foreground)] sm:text-6xl">
+              <h1 className="max-w-4xl text-[1.7rem] leading-[1.08] font-semibold tracking-tight text-[var(--foreground)] sm:text-[2.45rem] lg:text-[2.8rem]">
                 {studentCopy.headline}
               </h1>
               <p className="mt-6 max-w-5xl text-lg leading-9 text-[var(--muted)] sm:text-[1.1rem] sm:leading-10">
@@ -71,14 +72,14 @@ export default function HomePage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap">
               <Link
                 href="/teachers"
-                className="inline-flex w-full items-center justify-center gap-3 rounded-full bg-[var(--primary)] px-8 py-4 text-lg font-semibold text-white sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-3 rounded-full bg-[var(--primary)] px-6 py-3 text-base font-semibold text-white sm:w-auto"
               >
                 {copy.browseTeachers}
                 <ArrowRight className="h-5 w-5" />
               </Link>
               <Link
                 href="/courses"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--border)] bg-white px-8 py-4 text-lg font-semibold sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-[var(--border)] bg-white px-6 py-3 text-base font-semibold sm:w-auto"
               >
                 {copy.browseCourses}
               </Link>
@@ -96,7 +97,11 @@ export default function HomePage() {
           <div className="space-y-6">
             <Card>
               <SectionHeading title={copy.latestActivity} />
-              {loading ? <div className="text-sm text-[var(--muted)]">{studentCopy.loadingActivity}</div> : <CommentThread comments={latestComments} />}
+              {loading ? (
+                <div className="text-sm text-[var(--muted)]">{studentCopy.loadingActivity}</div>
+              ) : (
+                <CommentThread comments={latestComments} onMutated={() => setRefreshNonce((current) => current + 1)} />
+              )}
             </Card>
           </div>
           <div className="space-y-6">
@@ -122,9 +127,9 @@ export default function HomePage() {
 
   return (
     <div className="space-y-6">
-      <Card className="overflow-hidden bg-[radial-gradient(circle_at_top_right,_rgba(10,102,194,0.15),_transparent_28%),_white]">
+      <Card className="overflow-hidden bg-[radial-gradient(circle_at_top_right,_rgba(10,102,194,0.15),_transparent_28%),_white] pl-6">
         <div>
-          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-[var(--foreground)]">
+          <h1 className="max-w-3xl pt-2 text-[1.8rem] leading-[1.08] font-semibold tracking-tight text-[var(--foreground)] sm:text-[2.35rem] lg:text-[2.7rem]">
             {locale === "zh"
               ? "你的声音，将会被保护"
               : "Your voice will be protected."}
@@ -140,11 +145,11 @@ export default function HomePage() {
               : "Choose a WLSA course or teacher and start sharing your views."}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/teachers" className="inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-white">
+            <Link href="/teachers" className="inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-4 py-2.5 text-sm font-semibold text-white">
               {copy.browseTeachers}
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link href="/courses" className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white px-5 py-3 text-sm font-semibold">
+            <Link href="/courses" className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white px-4 py-2.5 text-sm font-semibold">
               {copy.browseCourses}
             </Link>
           </div>
@@ -167,7 +172,11 @@ export default function HomePage() {
         <div className="space-y-6">
           <Card>
             <SectionHeading title={copy.latestActivity} />
-            {loading ? <div className="text-sm text-[var(--muted)]">{studentCopy.loadingActivity}</div> : <CommentThread comments={latestComments} />}
+            {loading ? (
+              <div className="text-sm text-[var(--muted)]">{studentCopy.loadingActivity}</div>
+            ) : (
+              <CommentThread comments={latestComments} onMutated={() => setRefreshNonce((current) => current + 1)} />
+            )}
           </Card>
         </div>
         <div className={cn("space-y-6", !user && "2xl:hidden")}>

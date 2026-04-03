@@ -135,7 +135,7 @@ export const dictionary = {
   },
   zh: {
     appName: "WLSelect",
-    tagline: "用社区经验支持更好的选课决策",
+    tagline: "打分 吐槽 帮你看清每个课的事实",
     englishLabel: "英文",
     chineseLabel: "中文",
     home: "首页",

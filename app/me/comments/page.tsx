@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { Card } from "@/components/card";
 import { CommentThread } from "@/components/comment-thread";
 import { useLocale } from "@/components/locale-provider";
@@ -9,7 +11,8 @@ import { Comment } from "@/lib/types";
 
 export default function MyCommentsPage() {
   const { copy, locale } = useLocale();
-  const { data, loading, error } = useApiData<{ comments: Comment[] }>("/api/me");
+  const [refreshNonce, setRefreshNonce] = useState(0);
+  const { data, loading, error } = useApiData<{ comments: Comment[] }>(`/api/me?r=${refreshNonce}`);
   const comments = data?.comments ?? [];
   const displayError = error === "Unauthorized." ? "请先登录" : error;
 
@@ -20,7 +23,7 @@ export default function MyCommentsPage() {
       </Card>
       {loading ? <Card>{copy.loadingComments}</Card> : null}
       {displayError ? <Card>{displayError}</Card> : null}
-      <CommentThread comments={comments} canReply />
+      <CommentThread comments={comments} canReply onMutated={() => setRefreshNonce((current) => current + 1)} />
     </div>
   );
 }

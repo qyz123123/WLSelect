@@ -277,7 +277,8 @@ export async function getTeachers(viewerId?: string, guestKey?: string) {
       ratings: true,
       _count: {
         select: {
-          favorites: true
+          favorites: true,
+          comments: true
         }
       }
     },
@@ -300,6 +301,7 @@ export async function getTeachers(viewerId?: string, guestKey?: string) {
     })),
     avatar: teacher.avatarUrl ?? resolveAvatar(teacher.user),
     stars: teacher._count.favorites,
+    commentCount: teacher._count.comments,
     ratings: mapRatings(teacher.ratings),
     isFavorite: favorites.has(buildTargetKey(TargetType.TEACHER, teacher.id))
   }));
@@ -321,7 +323,8 @@ export async function getTeacherById(id: string, viewerId?: string, guestKey?: s
       ratings: true,
       _count: {
         select: {
-          favorites: true
+          favorites: true,
+          comments: true
         }
       }
     }
@@ -347,6 +350,7 @@ export async function getTeacherById(id: string, viewerId?: string, guestKey?: s
     })),
     avatar: teacher.avatarUrl ?? resolveAvatar(teacher.user),
     stars: teacher._count.favorites,
+    commentCount: teacher._count.comments,
     ratings: mapRatings(teacher.ratings),
     isFavorite: favorites.has(buildTargetKey(TargetType.TEACHER, teacher.id))
   } satisfies TeacherProfile;
@@ -858,6 +862,79 @@ export async function getFeedItems(viewer: AppUser | null = null) {
   return items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
+export async function getPopularComments(viewer: AppUser | null = null, take = 6) {
+  const comments = await prisma.comment.findMany({
+    where: viewer
+      ? {
+          OR: [
+            { visibility: Visibility.PUBLIC_ONLY },
+            { authorId: viewer.id }
+          ]
+        }
+      : { visibility: Visibility.PUBLIC_ONLY },
+    include: {
+      author: {
+        include: userProfileInclude
+      },
+      teacherProfile: {
+        select: {
+          displayName: true
+        }
+      },
+      course: {
+        select: {
+          slug: true,
+          name: true
+        }
+      },
+      ratings: true,
+      replies: {
+        include: {
+          author: {
+            include: userProfileInclude
+          },
+          _count: {
+            select: { likes: true }
+          }
+        },
+        orderBy: { createdAt: "asc" }
+      },
+      _count: {
+        select: {
+          likes: true
+        }
+      }
+    }
+  });
+
+  return comments
+    .map<Comment>((comment) => ({
+      id: comment.id,
+      targetType: mapTargetType(comment.targetType),
+      targetId: comment.teacherProfileId ?? comment.courseId ?? "",
+      ...buildInteractionTargetMeta({
+        interactionKind: "comment",
+        interactionId: comment.id,
+        teacherProfileId: comment.teacherProfileId,
+        teacherName: comment.teacherProfile?.displayName,
+        course: comment.course
+      }),
+      ...resolveContentAuthor({
+        author: comment.author,
+        guestName: comment.guestName
+      }),
+      title: comment.title ?? "Comment",
+      body: comment.body,
+      visibility: comment.visibility,
+      likes: comment._count.likes,
+      createdAt: comment.createdAt.toISOString(),
+      ratings: mapRatings(comment.ratings),
+      replies: comment.replies.map((reply) => mapCommentReply({ reply }))
+    }))
+    .sort((a, b) => b.likes - a.likes || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, take);
+}
+
 export async function getUserComments(userId: string) {
   const viewer = await getCurrentUser(userId);
 
@@ -1025,7 +1102,7 @@ export async function searchAll(query: string) {
         user: { include: userProfileInclude },
         courseLinks: { include: { course: true } },
         ratings: true,
-        _count: { select: { favorites: true } }
+        _count: { select: { favorites: true, comments: true } }
       },
       take: 10
     }),
@@ -1124,6 +1201,7 @@ export async function searchAll(query: string) {
       })),
       avatar: teacher.avatarUrl ?? resolveAvatar(teacher.user),
       stars: teacher._count.favorites,
+      commentCount: teacher._count.comments,
       ratings: mapRatings(teacher.ratings)
     })),
     courses: courses.map<Course>((course) => ({

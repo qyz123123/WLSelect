@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ReactNode } from "react";
 import { ArrowLeftRight, GraduationCap, UserRoundCog } from "lucide-react";
@@ -10,6 +11,7 @@ import { useIdentity } from "@/components/identity-provider";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { useLocale } from "@/components/locale-provider";
 import { AppUser } from "@/lib/types";
+import logo from "@/logo.png";
 
 const bypassPaths = ["/login", "/signup", "/teacher/login", "/teacher/register", "/student/login", "/student/register", "/admin/login"];
 
@@ -41,7 +43,7 @@ export function IdentityGate({
           <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-[var(--primary-soft)]">
-                <img src="/favicon.ico" alt="WLSelect" className="h-8 w-8 object-contain" />
+                <Image src={logo} alt="WLSelect" className="h-8 w-8 object-contain" />
               </div>
               <div>
                 <div className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">WLSelect</div>
@@ -91,7 +93,7 @@ export function IdentityGate({
         <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[var(--primary-soft)]">
-              <img src="/favicon.ico" alt="WLSelect" className="h-8 w-8 object-contain" />
+              <Image src={logo} alt="WLSelect" className="h-8 w-8 object-contain" />
             </div>
             <div>
               <div className="text-2xl font-semibold tracking-tight text-[var(--foreground)]">WLSelect</div>

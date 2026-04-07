@@ -37,7 +37,7 @@ export function AppShell({
               <div className="mx-auto grid max-w-[1480px] gap-6 px-4 pb-8 xl:grid-cols-[280px_minmax(0,1fr)] 2xl:grid-cols-[280px_minmax(0,1fr)_320px] lg:px-6">
                 <Sidebar viewer={viewer} />
                 <main className="min-w-0">{children}</main>
-                <div className="xl:col-span-2 2xl:col-span-1">
+                <div className="xl:col-start-2 2xl:col-start-auto">
                   <ShellRightRail />
                 </div>
               </div>

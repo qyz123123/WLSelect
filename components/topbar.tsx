@@ -82,10 +82,13 @@ export function Topbar({
           </Link>
           {user ? (
             <div className="flex items-center gap-2">
-              <Link href="/me/profile" className="flex h-[30px] items-center gap-2 rounded-full border border-[var(--border)] bg-white px-2.5 sm:px-3">
-                <img src={user.avatar} alt={user.name} className="h-6 w-6 rounded-full object-cover" />
-                <div className="hidden text-left md:block">
-                  <div className="topbar-text text-[var(--foreground)]">{user.name}</div>
+              <Link
+                href="/me/profile"
+                className="flex min-h-[30px] min-w-0 max-w-[220px] items-center gap-2 rounded-full border border-[var(--border)] bg-white px-2.5 py-1 sm:px-3"
+              >
+                <img src={user.avatar} alt={user.name} className="h-6 w-6 shrink-0 rounded-full object-cover" />
+                <div className="hidden min-w-0 text-left md:flex md:flex-col md:justify-center md:gap-1">
+                  <div className="topbar-text truncate text-[var(--foreground)]">{user.name}</div>
                   <RoleBadge role={user.role} verified={user.teacherVerified} />
                 </div>
               </Link>

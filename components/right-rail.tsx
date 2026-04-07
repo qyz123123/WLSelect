@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Star } from "lucide-react";
+import { ArrowDownWideNarrow, ArrowUpWideNarrow, MessageSquare, Star } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { GuestNameDialog } from "@/components/guest-name-dialog";
@@ -34,6 +34,8 @@ export function RightRail({
   const [courseItems, setCourseItems] = useState(courses);
   const [showAllTeachers, setShowAllTeachers] = useState(false);
   const [showAllCourses, setShowAllCourses] = useState(false);
+  const [teacherSortOrder, setTeacherSortOrder] = useState<"desc" | "asc">("desc");
+  const [courseSortOrder, setCourseSortOrder] = useState<"desc" | "asc">("desc");
   const [guestDialogOpen, setGuestDialogOpen] = useState(false);
   const [guestSuggestion, setGuestSuggestion] = useState(identity.guestDisplayName ?? "");
   const [guestLoading, setGuestLoading] = useState(false);
@@ -42,11 +44,13 @@ export function RightRail({
   useEffect(() => {
     setTeacherItems(teachers);
     setShowAllTeachers(false);
+    setTeacherSortOrder("desc");
   }, [teachers]);
 
   useEffect(() => {
     setCourseItems(courses);
     setShowAllCourses(false);
+    setCourseSortOrder("desc");
   }, [courses]);
 
   useEffect(() => {
@@ -90,7 +94,7 @@ export function RightRail({
       [...courseItems]
         .map((course) => {
           const ratingSummary = summarizeRatings(course.ratings);
-          const score = Number((course.stars * 2 + ratingSummary.average * 20).toFixed(1));
+          const score = Number((ratingSummary.average * 2 + course.stars).toFixed(1));
 
           return {
             ...course,
@@ -98,15 +102,19 @@ export function RightRail({
             overallScore: ratingSummary.average
           };
         })
-        .sort((a, b) => b.trendScore - a.trendScore || b.stars - a.stars || a.name.localeCompare(b.name)),
-    [courseItems]
+        .sort((a, b) =>
+          courseSortOrder === "desc"
+            ? b.trendScore - a.trendScore || b.stars - a.stars || a.name.localeCompare(b.name)
+            : a.trendScore - b.trendScore || a.stars - b.stars || a.name.localeCompare(b.name)
+        ),
+    [courseItems, courseSortOrder]
   );
   const trendingTeachers = useMemo(
     () =>
       [...teacherItems]
         .map((teacher) => {
           const ratingSummary = summarizeRatings(teacher.ratings);
-          const score = Number((teacher.stars * 2 + ratingSummary.average * 20).toFixed(1));
+          const score = Number((ratingSummary.average * 2 + teacher.stars).toFixed(1));
 
           return {
             ...teacher,
@@ -114,13 +122,24 @@ export function RightRail({
             overallScore: ratingSummary.average
           };
         })
-        .sort((a, b) => b.trendScore - a.trendScore || b.stars - a.stars || a.name.localeCompare(b.name)),
-    [teacherItems]
+        .sort((a, b) =>
+          teacherSortOrder === "desc"
+            ? b.trendScore - a.trendScore || b.stars - a.stars || a.name.localeCompare(b.name)
+            : a.trendScore - b.trendScore || a.stars - b.stars || a.name.localeCompare(b.name)
+        ),
+    [teacherItems, teacherSortOrder]
   );
   const visibleTeachers = showAllTeachers ? trendingTeachers : trendingTeachers.slice(0, 7);
   const visibleCourses = showAllCourses ? trendingCourses : trendingCourses.slice(0, 7);
   const formatScore = (score: number) => (score > 0 ? (Number.isInteger(score) ? score.toFixed(0) : score.toFixed(1)) : "—");
-  const getRankBadge = (index: number) => {
+  const getRankBadge = (index: number, sortOrder: "desc" | "asc") => {
+    if (sortOrder === "asc") {
+      return {
+        label: String(index + 1),
+        className: "bg-white text-[var(--muted)]"
+      };
+    }
+
     if (index === 0) {
       return {
         label: locale === "zh" ? "金牌 1" : "Gold 1",
@@ -147,6 +166,10 @@ export function RightRail({
       className: "bg-white text-[var(--muted)]"
     };
   };
+  const rankingToggleLabel = (sortOrder: "desc" | "asc") =>
+    locale === "zh" ? (sortOrder === "desc" ? "好评榜" : "差评榜") : sortOrder === "desc" ? "Top rated" : "Low rated";
+  const SortOrderIcon = ({ sortOrder }: { sortOrder: "desc" | "asc" }) =>
+    sortOrder === "desc" ? <ArrowDownWideNarrow className="h-3 w-3" /> : <ArrowUpWideNarrow className="h-3 w-3" />;
 
   async function saveGuestIdentity(name: string) {
     const response = await fetch("/api/guest/display-name", {
@@ -248,9 +271,19 @@ export function RightRail({
           </p>
           <div className="space-y-3">
             <div className="space-y-2">
-              <div className="text-sm font-semibold text-[var(--muted)]">老师榜</div>
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-sm font-semibold text-[var(--muted)]">老师榜</div>
+                <button
+                  type="button"
+                  onClick={() => setTeacherSortOrder((current) => (current === "desc" ? "asc" : "desc"))}
+                  className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[11px] font-semibold leading-none text-[var(--muted)] transition hover:bg-[var(--surface-alt)]"
+                >
+                  <SortOrderIcon sortOrder={teacherSortOrder} />
+                  <span className="text-[11px] font-semibold leading-none">{rankingToggleLabel(teacherSortOrder)}</span>
+                </button>
+              </div>
               {visibleTeachers.map((teacher, index) => {
-                const rankBadge = getRankBadge(index);
+                const rankBadge = getRankBadge(index, teacherSortOrder);
 
                 return (
                 <div
@@ -288,6 +321,11 @@ export function RightRail({
                         {teacher.stars}
                       </button>
                       <span className="mx-1.5">•</span>
+                      <span className="inline-flex items-center gap-1">
+                        <MessageSquare className="h-3.5 w-3.5" />
+                        {teacher.commentCount}
+                      </span>
+                      <span className="mx-1.5">•</span>
                       <span>{locale === "zh" ? copy.overallScore : copy.overallScore}: {formatScore(teacher.overallScore)}</span>
                     </div>
                   </div>
@@ -307,9 +345,19 @@ export function RightRail({
               ) : null}
             </div>
             <div className="space-y-2 pt-1">
-              <div className="text-sm font-semibold text-[var(--muted)]">课程榜</div>
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-sm font-semibold text-[var(--muted)]">课程榜</div>
+                <button
+                  type="button"
+                  onClick={() => setCourseSortOrder((current) => (current === "desc" ? "asc" : "desc"))}
+                  className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-white px-2 py-0.5 text-[11px] font-semibold leading-none text-[var(--muted)] transition hover:bg-[var(--surface-alt)]"
+                >
+                  <SortOrderIcon sortOrder={courseSortOrder} />
+                  <span className="text-[11px] font-semibold leading-none">{rankingToggleLabel(courseSortOrder)}</span>
+                </button>
+              </div>
               {visibleCourses.map((course, index) => {
-                const rankBadge = getRankBadge(index);
+                const rankBadge = getRankBadge(index, courseSortOrder);
 
                 return (
                 <div
@@ -345,6 +393,11 @@ export function RightRail({
                         <Star className="h-3.5 w-3.5" fill={course.isFavorite ? "currentColor" : "none"} />
                         {course.stars}
                       </button>
+                      <span className="mx-1.5">•</span>
+                      <span className="inline-flex items-center gap-1">
+                        <MessageSquare className="h-3.5 w-3.5" />
+                        {course.commentCount}
+                      </span>
                       <span className="mx-1.5">•</span>
                       <span>{locale === "zh" ? copy.overallScore : copy.overallScore}: {formatScore(course.overallScore)}</span>
                     </div>

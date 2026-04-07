@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowRight, MessageSquare } from "lucide-react";
 
 import { Card } from "@/components/card";
 import { CommentThread } from "@/components/comment-thread";
@@ -12,7 +12,7 @@ import { SectionHeading } from "@/components/section-heading";
 import { useShellData } from "@/components/shell-data-provider";
 import { useViewer } from "@/components/viewer-provider";
 import { useApiData } from "@/hooks/use-api-data";
-import { AppUser, Comment, FeedItem } from "@/lib/types";
+import { AppUser, Comment, Course, TeacherProfile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export default function HomePage() {
@@ -22,15 +22,57 @@ export default function HomePage() {
   const [refreshNonce, setRefreshNonce] = useState(0);
   const { data, loading } = useApiData<{
     currentUser: AppUser | null;
-    feedItems: FeedItem[];
   }>(`/api/bootstrap?r=${refreshNonce}`);
-
-  const latestComments = useMemo(
-    () => (data?.feedItems.filter((item) => item.kind === "comment").map((item) => item.payload as Comment) ?? []),
-    [data]
-  );
   const user = data?.currentUser ?? initialViewer;
   const isStudentHome = user?.role === "student";
+  const [selectedTargetType, setSelectedTargetType] = useState<"course" | "teacher" | "all-courses">("all-courses");
+  const [selectedTargetId, setSelectedTargetId] = useState<string>(
+    shellData.courses[0]?.id ?? shellData.teachers[0]?.id ?? ""
+  );
+
+  const selectedTargets = useMemo<Array<Course | TeacherProfile>>(
+    () =>
+      selectedTargetType === "course"
+        ? shellData.courses
+        : selectedTargetType === "teacher"
+          ? shellData.teachers
+          : [],
+    [selectedTargetType, shellData.courses, shellData.teachers]
+  );
+
+  const selectedTarget = useMemo(
+    () => selectedTargets.find((target) => target.id === selectedTargetId) ?? selectedTargets[0] ?? null,
+    [selectedTargetId, selectedTargets]
+  );
+
+  useEffect(() => {
+    if (!selectedTargets.length) {
+      if (selectedTargetId) {
+        setSelectedTargetId("");
+      }
+      return;
+    }
+
+    if (!selectedTarget || !selectedTargets.some((target) => target.id === selectedTarget.id)) {
+      setSelectedTargetId(selectedTargets[0].id);
+    }
+  }, [selectedTarget, selectedTargetId, selectedTargets]);
+
+  const {
+    data: selectedCommentsData,
+    loading: selectedCommentsLoading
+  } = useApiData<{ comments: Comment[] }>(
+    selectedTargetType === "all-courses"
+      ? `/api/activity-comments?targetType=all-courses&r=${refreshNonce}`
+      : selectedTarget
+      ? `/api/activity-comments?targetType=${selectedTargetType}&targetId=${selectedTarget.id}&r=${refreshNonce}`
+      : `/api/activity-comments?r=${refreshNonce}`
+  );
+
+  const selectedComments = useMemo(
+    () => selectedCommentsData?.comments ?? [],
+    [selectedCommentsData]
+  );
 
   const studentCopy =
     locale === "zh"
@@ -52,6 +94,124 @@ export default function HomePage() {
           loadingActivity: "Loading activity...",
           loadingQuestions: "Loading questions..."
         };
+
+  const activityContent = loading ? (
+    <div className="text-sm text-[var(--muted)]">{studentCopy.loadingActivity}</div>
+  ) : (
+    <div className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
+      <div className="rounded-[var(--card-radius)] border border-[var(--border)] bg-white p-4">
+        <div className="text-sm font-semibold text-[var(--foreground)]">
+          {locale === "zh" ? "选择老师或课程" : "Choose a teacher or course"}
+        </div>
+        <p className="mt-1 text-sm text-[var(--muted)]">
+          {locale === "zh" ? "先选一个目标，再看这个老师或课程下最热门的评论。" : "Pick a teacher or course first, then review the most popular comments for that target."}
+        </p>
+        <div className="mt-3 inline-flex rounded-full border border-[var(--border)] bg-[var(--surface-alt)] p-1">
+          <button
+            type="button"
+            onClick={() => setSelectedTargetType("course")}
+            className={cn(
+              "rounded-full px-3 py-1.5 transition",
+              selectedTargetType === "course"
+                ? "bg-[var(--primary)] text-white"
+                : "text-[var(--muted)]"
+            )}
+          >
+            <span className="text-[13px] font-semibold leading-none">{copy.courses}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedTargetType("teacher")}
+            className={cn(
+              "rounded-full px-3 py-1.5 transition",
+              selectedTargetType === "teacher"
+                ? "bg-[var(--primary)] text-white"
+                : "text-[var(--muted)]"
+            )}
+          >
+            <span className="text-[13px] font-semibold leading-none">{copy.teachers}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedTargetType("all-courses")}
+            className={cn(
+              "rounded-full px-3 py-1.5 transition",
+              selectedTargetType === "all-courses"
+                ? "bg-[var(--primary)] text-white"
+                : "text-[var(--muted)]"
+            )}
+          >
+            <span className="text-[13px] font-semibold leading-none">{locale === "zh" ? "全部课程" : "All courses"}</span>
+          </button>
+        </div>
+        {selectedTargetType === "all-courses" ? (
+          <div className="mt-3 rounded-[var(--radius)] border border-[var(--primary)] bg-[var(--primary-soft)] px-3 py-2 text-[11px] font-medium text-[var(--primary)]">
+            {locale === "zh" ? "显示所有课程里点赞最高的热门评论。" : "Showing the top-liked comments across all courses."}
+          </div>
+        ) : (
+          <div className="mt-3 space-y-2">
+            {selectedTargets.slice(0, 8).map((target) => {
+              const label = selectedTargetType === "course" ? (target as Course).name : (target as TeacherProfile).name;
+              const commentCount =
+                selectedTargetType === "course" ? (target as Course).commentCount : (target as TeacherProfile).commentCount;
+
+              return (
+                <button
+                  key={target.id}
+                  type="button"
+                  onClick={() => setSelectedTargetId(target.id)}
+                  className={cn(
+                    "flex w-full items-center justify-between rounded-[var(--radius)] border px-3 py-1.5 text-left transition",
+                    selectedTarget?.id === target.id
+                      ? "border-[var(--primary)] bg-[var(--primary-soft)] text-[var(--primary)]"
+                      : "border-[var(--border)] bg-white hover:border-[var(--primary)]/40"
+                  )}
+                >
+                  <span className="truncate text-[14px] leading-5 font-medium">{label}</span>
+                  <span className="ml-3 inline-flex shrink-0 items-center gap-1.5 text-[11px] text-[var(--muted)]">
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    <span>{commentCount}</span>
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0" />
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      <div className="rounded-[var(--card-radius)] border border-[var(--border)] bg-white p-4">
+        <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div className="text-sm font-semibold text-[var(--foreground)]">
+              {locale === "zh" ? "热门评论" : "Popular comments"}
+            </div>
+            <p className="mt-1 text-sm text-[var(--muted)]">
+              {selectedTargetType === "all-courses"
+                ? locale === "zh"
+                  ? "正在查看所有课程里点赞最高的评论。"
+                  : "Showing the top-liked comments across all courses."
+                : selectedTarget
+                ? locale === "zh"
+                  ? `正在查看 ${selectedTargetType === "course" ? "课程" : "老师"}“${selectedTargetType === "course" ? (selectedTarget as Course).name : (selectedTarget as TeacherProfile).name}”下点赞最高的评论。`
+                  : `Showing top-liked comments for ${selectedTargetType === "course" ? (selectedTarget as Course).name : (selectedTarget as TeacherProfile).name}.`
+                : locale === "zh"
+                  ? "先从左边选择一个课程或老师。"
+                  : "Choose a course or teacher from the left first."}
+            </p>
+          </div>
+        </div>
+        {selectedCommentsLoading ? (
+          <div className="text-sm text-[var(--muted)]">{studentCopy.loadingActivity}</div>
+        ) : selectedComments.length > 0 ? (
+          <CommentThread comments={selectedComments} compact onMutated={() => setRefreshNonce((current) => current + 1)} />
+        ) : (
+          <div className="text-sm text-[var(--muted)]">
+            {locale === "zh" ? "这个老师或课程下还没有热门评论。" : "There are no popular comments for this target yet."}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   if (isStudentHome) {
     return (
@@ -97,11 +257,7 @@ export default function HomePage() {
           <div className="space-y-6">
             <Card>
               <SectionHeading title={copy.latestActivity} />
-              {loading ? (
-                <div className="text-sm text-[var(--muted)]">{studentCopy.loadingActivity}</div>
-              ) : (
-                <CommentThread comments={latestComments} onMutated={() => setRefreshNonce((current) => current + 1)} />
-              )}
+              {activityContent}
             </Card>
           </div>
           <div className="space-y-6">
@@ -172,11 +328,7 @@ export default function HomePage() {
         <div className="space-y-6">
           <Card>
             <SectionHeading title={copy.latestActivity} />
-            {loading ? (
-              <div className="text-sm text-[var(--muted)]">{studentCopy.loadingActivity}</div>
-            ) : (
-              <CommentThread comments={latestComments} onMutated={() => setRefreshNonce((current) => current + 1)} />
-            )}
+            {activityContent}
           </Card>
         </div>
         <div className={cn("space-y-6", !user && "2xl:hidden")}>

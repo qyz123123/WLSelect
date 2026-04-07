@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Bookmark, GraduationCap, Home, MessageSquareMore, NotebookText, UserRound } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -7,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { useLocale } from "@/components/locale-provider";
 import { AppUser } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import logoLong from "@/logo_long.png";
 
 const items = [
   { href: "/", key: "home", icon: Home },
@@ -54,7 +56,7 @@ export function Sidebar({ viewer }: { viewer: AppUser | null }) {
       </aside>
       <aside className="card-surface sticky top-6 hidden h-fit rounded-[28px] p-4 xl:block">
         <div className="mb-5 border-b border-[var(--border)] pb-4">
-          <div className="text-lg font-semibold tracking-tight text-[var(--foreground)]">{copy.appName}</div>
+          <Image src={logoLong} alt={copy.appName} className="h-auto w-[138px]" priority />
           <p className="mt-1 text-sm text-[var(--muted)]">{copy.tagline}</p>
         </div>
         <nav className="space-y-1">

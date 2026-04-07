@@ -80,6 +80,7 @@ export interface TeacherProfile {
   }>;
   avatar: string;
   stars: number;
+  commentCount: number;
   ratings: RatingValue[];
   isFavorite?: boolean;
 }

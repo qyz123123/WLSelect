@@ -21,7 +21,7 @@ const items = [
 
 export function Sidebar({ viewer }: { viewer: AppUser | null }) {
   const pathname = usePathname();
-  const { copy } = useLocale();
+  const { copy, locale } = useLocale();
   const navItems = [
     ...items,
     ...(viewer?.role === "teacher" ? [{ href: "/teacher/dashboard", key: "management" as const, icon: UserRound }] : []),
@@ -57,7 +57,7 @@ export function Sidebar({ viewer }: { viewer: AppUser | null }) {
       <aside className="card-surface sticky top-6 hidden h-fit rounded-[28px] p-4 xl:block">
         <div className="mb-5 border-b border-[var(--border)] pb-4">
           <Image src={logoLong} alt={copy.appName} className="h-auto w-[138px]" priority />
-          <p className="mt-1 text-sm text-[var(--muted)]">{copy.tagline}</p>
+          <p className="mt-1 text-sm text-[var(--muted)]">{locale === "zh" ? "你的声音，他人的选择" : copy.tagline}</p>
         </div>
         <nav className="space-y-1">
           {navItems.map((item) => {

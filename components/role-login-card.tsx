@@ -82,13 +82,16 @@ export function RoleLoginCard({
     <Card>
       <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
       <p className="mt-2 text-sm leading-6 text-[var(--muted)]">{description}</p>
-      <form className="mt-6 space-y-4">
+      <form className="mt-6 space-y-4" autoComplete="off">
         {isTeacherLogin ? (
           <input
             type="text"
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder={locale === "zh" ? "教师姓名" : "Teacher name"}
+            autoComplete="off"
+            data-lpignore="true"
+            data-1p-ignore="true"
             className="w-full rounded-2xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)]"
           />
         ) : (
@@ -98,6 +101,9 @@ export function RoleLoginCard({
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder={locale === "zh" ? "邮箱" : "Email"}
+              autoComplete="off"
+              data-lpignore="true"
+              data-1p-ignore="true"
               className="w-full rounded-2xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)]"
             />
             <input
@@ -105,6 +111,9 @@ export function RoleLoginCard({
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder={locale === "zh" ? "密码" : "Password"}
+              autoComplete="new-password"
+              data-lpignore="true"
+              data-1p-ignore="true"
               className="w-full rounded-2xl border border-[var(--border)] px-4 py-3 outline-none focus:border-[var(--primary)]"
             />
           </>

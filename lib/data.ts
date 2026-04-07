@@ -1,5 +1,7 @@
 import { CourseRequestStatus, CourseSystem, Prisma, TargetType, UserRole, Visibility } from "@prisma/client";
 
+import { getShanghaiDayRange } from "@/lib/analytics-time";
+import { FIXED_ADMIN_ID, getFixedAdminUser } from "@/lib/fixed-admin";
 import { prisma } from "@/lib/prisma";
 import { buildTargetKey } from "@/lib/targets";
 import {
@@ -76,6 +78,74 @@ function localizeNotification(locale: "en" | "zh", title: string, body: string) 
 
 function mapTargetType(targetType: TargetType): "teacher" | "course" {
   return targetType === TargetType.TEACHER ? "teacher" : "course";
+}
+
+async function getCourseCommentCountMap(courseIds: string[]) {
+  if (courseIds.length === 0) {
+    return new Map<string, number>();
+  }
+
+  const comments = await prisma.comment.findMany({
+    where: {
+      courseId: {
+        in: courseIds
+      }
+    },
+    select: {
+      courseId: true,
+      _count: {
+        select: {
+          replies: true
+        }
+      }
+    }
+  });
+
+  const commentCountMap = new Map<string, number>();
+
+  for (const comment of comments) {
+    if (!comment.courseId) {
+      continue;
+    }
+
+    commentCountMap.set(comment.courseId, (commentCountMap.get(comment.courseId) ?? 0) + 1 + comment._count.replies);
+  }
+
+  return commentCountMap;
+}
+
+async function getTeacherCommentCountMap(teacherIds: string[]) {
+  if (teacherIds.length === 0) {
+    return new Map<string, number>();
+  }
+
+  const comments = await prisma.comment.findMany({
+    where: {
+      teacherProfileId: {
+        in: teacherIds
+      }
+    },
+    select: {
+      teacherProfileId: true,
+      _count: {
+        select: {
+          replies: true
+        }
+      }
+    }
+  });
+
+  const commentCountMap = new Map<string, number>();
+
+  for (const comment of comments) {
+    if (!comment.teacherProfileId) {
+      continue;
+    }
+
+    commentCountMap.set(comment.teacherProfileId, (commentCountMap.get(comment.teacherProfileId) ?? 0) + 1 + comment._count.replies);
+  }
+
+  return commentCountMap;
 }
 
 function buildInteractionTargetMeta({
@@ -254,6 +324,10 @@ function canSeeComment(
 }
 
 export async function getCurrentUser(userId: string) {
+  if (userId === FIXED_ADMIN_ID) {
+    return getFixedAdminUser();
+  }
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: userProfileInclude
@@ -284,6 +358,7 @@ export async function getTeachers(viewerId?: string, guestKey?: string) {
     },
     orderBy: [{ favorites: { _count: "desc" } }, { displayName: "asc" }]
   });
+  const commentCountMap = await getTeacherCommentCountMap(teachers.map((teacher) => teacher.id));
 
   return teachers.map<TeacherProfile>((teacher) => ({
     id: teacher.id,
@@ -301,7 +376,7 @@ export async function getTeachers(viewerId?: string, guestKey?: string) {
     })),
     avatar: teacher.avatarUrl ?? resolveAvatar(teacher.user),
     stars: teacher._count.favorites,
-    commentCount: teacher._count.comments,
+    commentCount: commentCountMap.get(teacher.id) ?? 0,
     ratings: mapRatings(teacher.ratings),
     isFavorite: favorites.has(buildTargetKey(TargetType.TEACHER, teacher.id))
   }));
@@ -334,6 +409,8 @@ export async function getTeacherById(id: string, viewerId?: string, guestKey?: s
     return null;
   }
 
+  const commentCountMap = await getTeacherCommentCountMap([teacher.id]);
+
   return {
     id: teacher.id,
     userId: teacher.userId,
@@ -350,7 +427,7 @@ export async function getTeacherById(id: string, viewerId?: string, guestKey?: s
     })),
     avatar: teacher.avatarUrl ?? resolveAvatar(teacher.user),
     stars: teacher._count.favorites,
-    commentCount: teacher._count.comments,
+    commentCount: commentCountMap.get(teacher.id) ?? 0,
     ratings: mapRatings(teacher.ratings),
     isFavorite: favorites.has(buildTargetKey(TargetType.TEACHER, teacher.id))
   } satisfies TeacherProfile;
@@ -376,6 +453,7 @@ export async function getCourses(viewerId?: string, guestKey?: string) {
     },
     orderBy: [{ favorites: { _count: "desc" } }, { code: "asc" }]
   });
+  const commentCountMap = await getCourseCommentCountMap(courses.map((course) => course.id));
 
   return courses.map<Course>((course) => ({
     id: course.id,
@@ -390,7 +468,7 @@ export async function getCourses(viewerId?: string, guestKey?: string) {
     teacherIds: course.teacherLinks.map((link) => link.teacher.id),
     teacherNames: course.teacherLinks.map((link) => link.teacher.displayName),
     stars: course._count.favorites,
-    commentCount: course._count.comments,
+    commentCount: commentCountMap.get(course.id) ?? 0,
     questionCount: course._count.questions,
     ratings: mapRatings(course.ratings),
     isFavorite: favorites.has(buildTargetKey(TargetType.COURSE, course.id))
@@ -422,6 +500,8 @@ export async function getCourseBySlug(slug: string, viewerId?: string, guestKey?
     return null;
   }
 
+  const commentCountMap = await getCourseCommentCountMap([course.id]);
+
   return {
     id: course.id,
     slug: course.slug,
@@ -435,7 +515,7 @@ export async function getCourseBySlug(slug: string, viewerId?: string, guestKey?
     teacherIds: course.teacherLinks.map((link) => link.teacher.id),
     teacherNames: course.teacherLinks.map((link) => link.teacher.displayName),
     stars: course._count.favorites,
-    commentCount: course._count.comments,
+    commentCount: commentCountMap.get(course.id) ?? 0,
     questionCount: course._count.questions,
     ratings: mapRatings(course.ratings),
     isFavorite: favorites.has(buildTargetKey(TargetType.COURSE, course.id))
@@ -1054,7 +1134,10 @@ export async function getUserQuestions(userId: string) {
 }
 
 export async function getAdminDashboardData() {
-  const [users, pendingTeachers, courseCount, recentLogs] = await Promise.all([
+  const { start, end, dayKey } = getShanghaiDayRange();
+  const viewerDelegate = (prisma as typeof prisma & { viewer?: { count: (args?: unknown) => Promise<number> } }).viewer;
+  const viewerVisitDelegate = (prisma as typeof prisma & { viewerVisit?: { count: (args?: unknown) => Promise<number> } }).viewerVisit;
+  const [users, pendingTeachers, courseCount, teacherCount, totalComments, commentsToday, totalViewers, viewersToday, recentLogs] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({
       where: {
@@ -1063,6 +1146,24 @@ export async function getAdminDashboardData() {
       }
     }),
     prisma.course.count(),
+    prisma.teacherProfile.count(),
+    prisma.comment.count(),
+    prisma.comment.count({
+      where: {
+        createdAt: {
+          gte: start,
+          lt: end
+        }
+      }
+    }),
+    viewerDelegate ? viewerDelegate.count() : Promise.resolve(0),
+    viewerVisitDelegate
+      ? viewerVisitDelegate.count({
+          where: {
+            dayKey
+          }
+        })
+      : Promise.resolve(0),
     prisma.moderationLog.findMany({
       orderBy: { createdAt: "desc" },
       take: 5
@@ -1073,6 +1174,11 @@ export async function getAdminDashboardData() {
     users,
     pendingTeachers,
     courseCount,
+    teacherCount,
+    totalComments,
+    commentsToday,
+    totalViewers,
+    viewersToday,
     recentLogs
   };
 }
@@ -1183,6 +1289,8 @@ export async function searchAll(query: string) {
       take: 10
     })
   ]);
+  const teacherCommentCountMap = await getTeacherCommentCountMap(teachers.map((teacher) => teacher.id));
+  const courseCommentCountMap = await getCourseCommentCountMap(courses.map((course) => course.id));
 
   return {
     teachers: teachers.map<TeacherProfile>((teacher) => ({
@@ -1201,7 +1309,7 @@ export async function searchAll(query: string) {
       })),
       avatar: teacher.avatarUrl ?? resolveAvatar(teacher.user),
       stars: teacher._count.favorites,
-      commentCount: teacher._count.comments,
+      commentCount: teacherCommentCountMap.get(teacher.id) ?? 0,
       ratings: mapRatings(teacher.ratings)
     })),
     courses: courses.map<Course>((course) => ({
@@ -1217,7 +1325,7 @@ export async function searchAll(query: string) {
       teacherIds: course.teacherLinks.map((link) => link.teacher.id),
       teacherNames: course.teacherLinks.map((link) => link.teacher.displayName),
       stars: course._count.favorites,
-      commentCount: course._count.comments,
+      commentCount: courseCommentCountMap.get(course.id) ?? 0,
       questionCount: course._count.questions,
       ratings: mapRatings(course.ratings)
     })),

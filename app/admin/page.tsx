@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Card } from "@/components/card";
 import { useLocale } from "@/components/locale-provider";
@@ -22,6 +22,9 @@ type AdminCommentItem = {
 export default function AdminPage() {
   const { copy, locale } = useLocale();
   const [refreshNonce, setRefreshNonce] = useState(0);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [showAllTeachers, setShowAllTeachers] = useState(false);
+  const [showAllCourses, setShowAllCourses] = useState(false);
   const [courseForm, setCourseForm] = useState({
     slug: "",
     code: "",
@@ -51,6 +54,11 @@ export default function AdminPage() {
       users: number;
       pendingTeachers: number;
       courseCount: number;
+      teacherCount: number;
+      totalComments: number;
+      commentsToday: number;
+      totalViewers: number;
+      viewersToday: number;
       recentLogs: Array<{ id: string; details: string; action: string }>;
     };
     teachers: TeacherProfile[];
@@ -124,6 +132,16 @@ export default function AdminPage() {
       return matchesQuery && (commentTargetType === "all" ? true : comment.targetType === commentTargetType) && (commentTargetLabel ? comment.targetLabel === commentTargetLabel : true);
     });
   }, [commentQuery, commentTargetLabel, commentTargetType, data?.comments]);
+  const visibleTeachers = showAllTeachers ? filteredTeachers : filteredTeachers.slice(0, 8);
+  const visibleCourses = showAllCourses ? filteredCourses : filteredCourses.slice(0, 8);
+
+  useEffect(() => {
+    setShowAllTeachers(false);
+  }, [teacherQuery, teacherSubject, teacherDepartment, refreshNonce]);
+
+  useEffect(() => {
+    setShowAllCourses(false);
+  }, [courseQuery, courseSubjectFilter, courseSystemFilter, refreshNonce]);
 
   function formatLogAction(action: string) {
     if (locale !== "zh") {
@@ -188,8 +206,12 @@ export default function AdminPage() {
     const response = await fetch(`/api/admin/teachers/${id}`, { method: "DELETE" });
 
     if (!response.ok || !data) {
+      const payload = await response.json().catch(() => null);
+      setActionError(payload?.error ?? (locale === "zh" ? "删除老师失败。" : "Unable to delete teacher."));
       return;
     }
+
+    setActionError(null);
 
     setData({
       ...data,
@@ -206,8 +228,12 @@ export default function AdminPage() {
     const response = await fetch(`/api/admin/courses/${id}`, { method: "DELETE" });
 
     if (!response.ok || !data) {
+      const payload = await response.json().catch(() => null);
+      setActionError(payload?.error ?? (locale === "zh" ? "删除课程失败。" : "Unable to delete course."));
       return;
     }
+
+    setActionError(null);
 
     setData({
       ...data,
@@ -228,8 +254,12 @@ export default function AdminPage() {
     const response = await fetch(`/api/admin/comments/${id}`, { method: "DELETE" });
 
     if (!response.ok || !data) {
+      const payload = await response.json().catch(() => null);
+      setActionError(payload?.error ?? (locale === "zh" ? "删除评论失败。" : "Unable to delete comment."));
       return;
     }
+
+    setActionError(null);
 
     setData({
       ...data,
@@ -271,9 +301,12 @@ export default function AdminPage() {
     });
 
     if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      setActionError(payload?.error ?? (locale === "zh" ? "合并老师失败。" : "Unable to merge teachers."));
       return;
     }
 
+    setActionError(null);
     setTeacherMergeSourceId("");
     setTeacherMergeTargetId("");
     setRefreshNonce((current) => current + 1);
@@ -313,9 +346,12 @@ export default function AdminPage() {
     });
 
     if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      setActionError(payload?.error ?? (locale === "zh" ? "合并课程失败。" : "Unable to merge courses."));
       return;
     }
 
+    setActionError(null);
     setCourseMergeSourceId("");
     setCourseMergeTargetId("");
     setRefreshNonce((current) => current + 1);
@@ -339,13 +375,19 @@ export default function AdminPage() {
           />
           <RoleBadge role="admin" />
         </div>
+        {actionError ? <div className="mt-4 rounded-[var(--radius)] border border-[var(--danger)]/30 bg-red-50 px-4 py-3 text-sm text-[var(--danger)]">{actionError}</div> : null}
         <div className="grid gap-4 xl:grid-cols-2">
           <div className="rounded-[var(--card-radius)] border border-[var(--border)] bg-white p-4">
             <div className="text-base font-semibold">{copy.dashboard}</div>
-            <div className="mt-3 space-y-2 text-sm text-[var(--muted)]">
+            <div className="mt-3 grid gap-2 text-sm text-[var(--muted)] md:grid-cols-2">
               <div>{copy.users}: {data.dashboard.users}</div>
               <div>{copy.pendingTeacherVerification}: {data.dashboard.pendingTeachers}</div>
+              <div>{locale === "zh" ? "老师总数" : "Total teachers"}: {data.dashboard.teacherCount}</div>
               <div>{copy.officialCourseListSize}: {data.dashboard.courseCount}</div>
+              <div>{locale === "zh" ? "今日评论数" : "Comments today"}: {data.dashboard.commentsToday}</div>
+              <div>{locale === "zh" ? "评论总数" : "Total comments"}: {data.dashboard.totalComments}</div>
+              <div>{locale === "zh" ? "今日访客数" : "Viewers today"}: {data.dashboard.viewersToday}</div>
+              <div>{locale === "zh" ? "总访客数" : "Total viewers"}: {data.dashboard.totalViewers}</div>
             </div>
           </div>
           <div className="rounded-[var(--card-radius)] border border-[var(--border)] bg-white p-4">
@@ -415,7 +457,7 @@ export default function AdminPage() {
           </div>
         </div>
         <div className="mt-4 space-y-3">
-          {filteredTeachers.map((teacher) => (
+          {visibleTeachers.map((teacher) => (
             <div key={teacher.id} className="flex items-center justify-between gap-3 rounded-[var(--card-radius)] border border-[var(--border)] px-4 py-3">
               <div className="min-w-0">
                 <div className="truncate font-semibold">{teacher.name}</div>
@@ -437,6 +479,15 @@ export default function AdminPage() {
               </div>
             </div>
           ))}
+          {!showAllTeachers && filteredTeachers.length > 8 ? (
+            <button
+              type="button"
+              onClick={() => setShowAllTeachers(true)}
+              className="inline-flex items-center rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[var(--surface-alt)]"
+            >
+              {locale === "zh" ? "显示更多老师" : "Show more teachers"}
+            </button>
+          ) : null}
           {filteredTeachers.length === 0 ? <div className="text-sm text-[var(--muted)]">{locale === "zh" ? "没有符合条件的老师。" : "No teachers matched."}</div> : null}
         </div>
       </Card>
@@ -495,7 +546,7 @@ export default function AdminPage() {
               </div>
             </div>
             <div className="space-y-3">
-              {filteredCourses.map((course) => (
+              {visibleCourses.map((course) => (
                 <div key={course.id} className="flex items-center justify-between gap-3 rounded-[var(--card-radius)] border border-[var(--border)] px-4 py-3">
                   <div className="min-w-0">
                     <div className="truncate font-semibold">{course.name}</div>
@@ -512,6 +563,15 @@ export default function AdminPage() {
                   </button>
                 </div>
               ))}
+              {!showAllCourses && filteredCourses.length > 8 ? (
+                <button
+                  type="button"
+                  onClick={() => setShowAllCourses(true)}
+                  className="inline-flex items-center rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[var(--surface-alt)]"
+                >
+                  {locale === "zh" ? "显示更多课程" : "Show more courses"}
+                </button>
+              ) : null}
               {filteredCourses.length === 0 ? <div className="text-sm text-[var(--muted)]">{locale === "zh" ? "没有符合条件的课程。" : "No courses matched."}</div> : null}
             </div>
           </div>

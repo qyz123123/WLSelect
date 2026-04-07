@@ -20,6 +20,7 @@ export default function HomePage() {
   const shellData = useShellData();
   const initialViewer = useViewer();
   const [refreshNonce, setRefreshNonce] = useState(0);
+  const [showAllActivityTargets, setShowAllActivityTargets] = useState(false);
   const { data, loading } = useApiData<{
     currentUser: AppUser | null;
   }>(`/api/bootstrap?r=${refreshNonce}`);
@@ -32,13 +33,22 @@ export default function HomePage() {
 
   const selectedTargets = useMemo<Array<Course | TeacherProfile>>(
     () =>
-      selectedTargetType === "course"
-        ? shellData.courses
-        : selectedTargetType === "teacher"
-          ? shellData.teachers
-          : [],
+      (
+        selectedTargetType === "course"
+          ? shellData.courses
+          : selectedTargetType === "teacher"
+            ? shellData.teachers
+            : []
+      )
+        .filter((target) => target.commentCount > 0)
+        .slice()
+        .sort((a, b) => b.commentCount - a.commentCount || a.name.localeCompare(b.name)),
     [selectedTargetType, shellData.courses, shellData.teachers]
   );
+
+  useEffect(() => {
+    setShowAllActivityTargets(false);
+  }, [selectedTargetType]);
 
   const selectedTarget = useMemo(
     () => selectedTargets.find((target) => target.id === selectedTargetId) ?? selectedTargets[0] ?? null,
@@ -150,7 +160,18 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="mt-3 space-y-2">
-            {selectedTargets.slice(0, 8).map((target) => {
+            {selectedTargets.length === 0 ? (
+              <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface-alt)] px-3 py-2 text-sm text-[var(--muted)]">
+                {locale === "zh"
+                  ? selectedTargetType === "course"
+                    ? "还没有课程收到评论。"
+                    : "还没有老师收到评论。"
+                  : selectedTargetType === "course"
+                    ? "No courses have comments yet."
+                    : "No teachers have comments yet."}
+              </div>
+            ) : null}
+            {(showAllActivityTargets ? selectedTargets : selectedTargets.slice(0, 8)).map((target) => {
               const label = selectedTargetType === "course" ? (target as Course).name : (target as TeacherProfile).name;
               const commentCount =
                 selectedTargetType === "course" ? (target as Course).commentCount : (target as TeacherProfile).commentCount;
@@ -176,6 +197,21 @@ export default function HomePage() {
                 </button>
               );
             })}
+            {!showAllActivityTargets && selectedTargets.length > 8 ? (
+              <button
+                type="button"
+                onClick={() => setShowAllActivityTargets(true)}
+                className="inline-flex items-center rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[var(--surface-alt)]"
+              >
+                {locale === "zh"
+                  ? selectedTargetType === "course"
+                    ? "显示全部课程"
+                    : "显示全部老师"
+                  : selectedTargetType === "course"
+                    ? "Show all courses"
+                    : "Show all teachers"}
+              </button>
+            ) : null}
           </div>
         )}
       </div>

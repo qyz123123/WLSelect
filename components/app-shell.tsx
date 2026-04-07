@@ -7,6 +7,7 @@ import { ShellDataProvider } from "@/components/shell-data-provider";
 import { ShellRightRail } from "@/components/shell-right-rail";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
+import { ViewTracker } from "@/components/view-tracker";
 import { ViewerProvider } from "@/components/viewer-provider";
 import { AppUser, Course, NotificationItem, TeacherProfile } from "@/lib/types";
 
@@ -33,6 +34,7 @@ export function AppShell({
         <LocaleProvider initialLocale={initialLocale} persistToAccount={Boolean(viewer)}>
           <ShellDataProvider viewer={viewer} teachers={teachers} courses={courses} notifications={notifications}>
             <IdentityGate viewer={viewer}>
+              <ViewTracker viewerId={viewer?.id ?? null} />
               <Topbar user={viewer} unreadNotifications={unreadNotifications} />
               <div className="mx-auto grid max-w-[1480px] gap-6 px-4 pb-8 xl:grid-cols-[280px_minmax(0,1fr)] 2xl:grid-cols-[280px_minmax(0,1fr)_320px] lg:px-6">
                 <Sidebar viewer={viewer} />

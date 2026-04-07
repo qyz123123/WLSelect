@@ -81,6 +81,27 @@ model User {
   courseRequests        CourseRequest[]
 }
 
+model Viewer {
+  id          String       @id @default(cuid())
+  viewerKey   String       @unique
+  firstSeenAt DateTime     @default(now())
+  lastSeenAt  DateTime     @updatedAt
+  visits      ViewerVisit[]
+}
+
+model ViewerVisit {
+  id        String   @id @default(cuid())
+  viewerKey String
+  dayKey    String
+  lastPath  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  viewer    Viewer   @relation(fields: [viewerKey], references: [viewerKey], onDelete: Cascade)
+
+  @@unique([viewerKey, dayKey])
+  @@index([dayKey])
+}
+
 model StudentProfile {
   id              String               @id @default(cuid())
   userId          String               @unique

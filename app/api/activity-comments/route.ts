@@ -8,13 +8,13 @@ export async function GET(request: NextRequest) {
   const targetType = request.nextUrl.searchParams.get("targetType");
   const targetId = request.nextUrl.searchParams.get("targetId");
 
-  if (targetType === "all-courses") {
+  if (targetType === "all" || targetType === "all-courses") {
     const session = await auth();
     const viewer = session?.user?.id ? await getCurrentUser(session.user.id) : null;
-    const comments = await getRecentComments(viewer, 8, "course");
+    const comments = await getRecentComments(viewer, 8);
 
     return NextResponse.json({
-      comments: comments.filter((comment) => comment.targetType === "course")
+      comments
     });
   }
 
@@ -30,7 +30,6 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     comments: comments
       .slice()
-      .filter((comment) => comment.targetType === targetType)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 8)
   });

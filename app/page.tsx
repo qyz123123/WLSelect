@@ -27,7 +27,7 @@ export default function HomePage() {
   }>(`/api/bootstrap?r=${refreshNonce}`);
   const user = data?.currentUser ?? initialViewer;
   const isStudentHome = user?.role === "student";
-  const [selectedTargetType, setSelectedTargetType] = useState<"course" | "teacher" | "all-courses">("all-courses");
+  const [selectedTargetType, setSelectedTargetType] = useState<"course" | "teacher" | "all">("all");
   const [selectedTargetId, setSelectedTargetId] = useState<string>(
     shellData.courses[0]?.id ?? shellData.teachers[0]?.id ?? ""
   );
@@ -77,21 +77,16 @@ export default function HomePage() {
     data: selectedCommentsData,
     loading: selectedCommentsLoading
   } = useApiData<{ comments: Comment[] }>(
-    selectedTargetType === "all-courses"
-      ? `/api/activity-comments?targetType=all-courses&r=${refreshNonce}`
+    selectedTargetType === "all"
+      ? `/api/activity-comments?targetType=all&r=${refreshNonce}`
       : selectedTarget
       ? `/api/activity-comments?targetType=${selectedTargetType}&targetId=${selectedTarget.id}&r=${refreshNonce}`
       : `/api/activity-comments?r=${refreshNonce}`
   );
 
   const selectedComments = useMemo(
-    () =>
-      (selectedCommentsData?.comments ?? []).filter((comment) =>
-        selectedTargetType === "all-courses"
-          ? comment.targetType === "course"
-          : comment.targetType === selectedTargetType
-      ),
-    [selectedCommentsData, selectedTargetType]
+    () => selectedCommentsData?.comments ?? [],
+    [selectedCommentsData]
   );
 
   const studentCopy =
@@ -153,20 +148,20 @@ export default function HomePage() {
           </button>
           <button
             type="button"
-            onClick={() => setSelectedTargetType("all-courses")}
+            onClick={() => setSelectedTargetType("all")}
             className={cn(
               "rounded-full px-3 py-1.5 transition",
-              selectedTargetType === "all-courses"
+              selectedTargetType === "all"
                 ? "bg-[var(--primary)] text-white"
                 : "text-[var(--muted)]"
             )}
           >
-            <span className="text-[13px] font-semibold leading-none">{locale === "zh" ? "全部课程" : "All courses"}</span>
+            <span className="text-[13px] font-semibold leading-none">{locale === "zh" ? "全部" : "All"}</span>
           </button>
         </div>
-        {selectedTargetType === "all-courses" ? (
+        {selectedTargetType === "all" ? (
           <div className="mt-3 rounded-[var(--radius)] border border-[var(--primary)] bg-[var(--primary-soft)] px-3 py-2 text-[11px] font-medium text-[var(--primary)]">
-            {locale === "zh" ? "显示所有课程里的最新评论。" : "Showing the latest comments across all courses."}
+            {locale === "zh" ? "显示课程和老师里的最新评论。" : "Showing the latest comments across courses and teachers."}
           </div>
         ) : (
           <div className="mt-3 space-y-2">
@@ -232,10 +227,10 @@ export default function HomePage() {
               {locale === "zh" ? "最新评论" : "Latest comments"}
             </div>
             <p className="mt-1 text-sm text-[var(--muted)]">
-              {selectedTargetType === "all-courses"
+              {selectedTargetType === "all"
                 ? locale === "zh"
-                  ? "正在查看所有课程里的最新评论。"
-                  : "Showing the latest comments across all courses."
+                  ? "正在查看课程和老师里的最新评论。"
+                  : "Showing the latest comments across courses and teachers."
                 : selectedTarget
                 ? locale === "zh"
                   ? `正在查看 ${selectedTargetType === "course" ? "课程" : "老师"}“${selectedTargetType === "course" ? (selectedTarget as Course).name : (selectedTarget as TeacherProfile).name}”下最新的评论。`

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { auth } from "@/auth";
-import { getCommentsForTarget, getCurrentUser, getPopularComments } from "@/lib/data";
+import { getCommentsForTarget, getCurrentUser, getRecentComments } from "@/lib/data";
 import { readGuestKeyFromCookie } from "@/lib/identity-cookie-server";
 
 export async function GET(request: NextRequest) {
@@ -11,10 +11,10 @@ export async function GET(request: NextRequest) {
   if (targetType === "all-courses") {
     const session = await auth();
     const viewer = session?.user?.id ? await getCurrentUser(session.user.id) : null;
-    const comments = await getPopularComments(viewer, 30);
+    const comments = await getRecentComments(viewer, 8, "course");
 
     return NextResponse.json({
-      comments: comments.filter((comment) => comment.targetType === "course").slice(0, 6)
+      comments: comments.filter((comment) => comment.targetType === "course")
     });
   }
 
@@ -30,7 +30,8 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     comments: comments
       .slice()
-      .sort((a, b) => b.likes - a.likes || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 6)
+      .filter((comment) => comment.targetType === targetType)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 8)
   });
 }

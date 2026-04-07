@@ -1015,6 +1015,86 @@ export async function getPopularComments(viewer: AppUser | null = null, take = 6
     .slice(0, take);
 }
 
+export async function getRecentComments(
+  viewer: AppUser | null = null,
+  take = 8,
+  targetType?: "course" | "teacher"
+) {
+  const comments = await prisma.comment.findMany({
+    where: {
+      ...(viewer
+        ? {
+            OR: [{ visibility: Visibility.PUBLIC_ONLY }, { authorId: viewer.id }]
+          }
+        : { visibility: Visibility.PUBLIC_ONLY }),
+      ...(targetType
+        ? {
+            targetType: targetType === "course" ? TargetType.COURSE : TargetType.TEACHER
+          }
+        : {})
+    },
+    include: {
+      author: {
+        include: userProfileInclude
+      },
+      teacherProfile: {
+        select: {
+          displayName: true
+        }
+      },
+      course: {
+        select: {
+          slug: true,
+          name: true
+        }
+      },
+      ratings: true,
+      replies: {
+        include: {
+          author: {
+            include: userProfileInclude
+          },
+          _count: {
+            select: { likes: true }
+          }
+        },
+        orderBy: { createdAt: "asc" }
+      },
+      _count: {
+        select: {
+          likes: true
+        }
+      }
+    },
+    orderBy: { createdAt: "desc" },
+    take
+  });
+
+  return comments.map<Comment>((comment) => ({
+    id: comment.id,
+    targetType: mapTargetType(comment.targetType),
+    targetId: comment.teacherProfileId ?? comment.courseId ?? "",
+    ...buildInteractionTargetMeta({
+      interactionKind: "comment",
+      interactionId: comment.id,
+      teacherProfileId: comment.teacherProfileId,
+      teacherName: comment.teacherProfile?.displayName,
+      course: comment.course
+    }),
+    ...resolveContentAuthor({
+      author: comment.author,
+      guestName: comment.guestName
+    }),
+    title: comment.title ?? "Comment",
+    body: comment.body,
+    visibility: comment.visibility,
+    likes: comment._count.likes,
+    createdAt: comment.createdAt.toISOString(),
+    ratings: mapRatings(comment.ratings),
+    replies: comment.replies.map((reply) => mapCommentReply({ reply }))
+  }));
+}
+
 export async function getUserComments(userId: string) {
   const viewer = await getCurrentUser(userId);
 

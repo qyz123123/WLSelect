@@ -21,6 +21,7 @@ export default function HomePage() {
   const initialViewer = useViewer();
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [showAllActivityTargets, setShowAllActivityTargets] = useState(false);
+  const [showMoreRecentComments, setShowMoreRecentComments] = useState(false);
   const { data, loading } = useApiData<{
     currentUser: AppUser | null;
   }>(`/api/bootstrap?r=${refreshNonce}`);
@@ -49,6 +50,10 @@ export default function HomePage() {
   useEffect(() => {
     setShowAllActivityTargets(false);
   }, [selectedTargetType]);
+
+  useEffect(() => {
+    setShowMoreRecentComments(false);
+  }, [selectedTargetType, selectedTargetId]);
 
   const selectedTarget = useMemo(
     () => selectedTargets.find((target) => target.id === selectedTargetId) ?? selectedTargets[0] ?? null,
@@ -80,8 +85,13 @@ export default function HomePage() {
   );
 
   const selectedComments = useMemo(
-    () => selectedCommentsData?.comments ?? [],
-    [selectedCommentsData]
+    () =>
+      (selectedCommentsData?.comments ?? []).filter((comment) =>
+        selectedTargetType === "all-courses"
+          ? comment.targetType === "course"
+          : comment.targetType === selectedTargetType
+      ),
+    [selectedCommentsData, selectedTargetType]
   );
 
   const studentCopy =
@@ -114,7 +124,7 @@ export default function HomePage() {
           {locale === "zh" ? "选择老师或课程" : "Choose a teacher or course"}
         </div>
         <p className="mt-1 text-sm text-[var(--muted)]">
-          {locale === "zh" ? "先选一个目标，再看这个老师或课程下最热门的评论。" : "Pick a teacher or course first, then review the most popular comments for that target."}
+          {locale === "zh" ? "先选一个目标，再看这个老师或课程下最新的评论。" : "Pick a teacher or course first, then review the latest comments for that target."}
         </p>
         <div className="mt-3 inline-flex rounded-full border border-[var(--border)] bg-[var(--surface-alt)] p-1">
           <button
@@ -156,7 +166,7 @@ export default function HomePage() {
         </div>
         {selectedTargetType === "all-courses" ? (
           <div className="mt-3 rounded-[var(--radius)] border border-[var(--primary)] bg-[var(--primary-soft)] px-3 py-2 text-[11px] font-medium text-[var(--primary)]">
-            {locale === "zh" ? "显示所有课程里点赞最高的热门评论。" : "Showing the top-liked comments across all courses."}
+            {locale === "zh" ? "显示所有课程里的最新评论。" : "Showing the latest comments across all courses."}
           </div>
         ) : (
           <div className="mt-3 space-y-2">
@@ -219,17 +229,17 @@ export default function HomePage() {
         <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="text-sm font-semibold text-[var(--foreground)]">
-              {locale === "zh" ? "热门评论" : "Popular comments"}
+              {locale === "zh" ? "最新评论" : "Latest comments"}
             </div>
             <p className="mt-1 text-sm text-[var(--muted)]">
               {selectedTargetType === "all-courses"
                 ? locale === "zh"
-                  ? "正在查看所有课程里点赞最高的评论。"
-                  : "Showing the top-liked comments across all courses."
+                  ? "正在查看所有课程里的最新评论。"
+                  : "Showing the latest comments across all courses."
                 : selectedTarget
                 ? locale === "zh"
-                  ? `正在查看 ${selectedTargetType === "course" ? "课程" : "老师"}“${selectedTargetType === "course" ? (selectedTarget as Course).name : (selectedTarget as TeacherProfile).name}”下点赞最高的评论。`
-                  : `Showing top-liked comments for ${selectedTargetType === "course" ? (selectedTarget as Course).name : (selectedTarget as TeacherProfile).name}.`
+                  ? `正在查看 ${selectedTargetType === "course" ? "课程" : "老师"}“${selectedTargetType === "course" ? (selectedTarget as Course).name : (selectedTarget as TeacherProfile).name}”下最新的评论。`
+                  : `Showing the latest comments for ${selectedTargetType === "course" ? (selectedTarget as Course).name : (selectedTarget as TeacherProfile).name}.`
                 : locale === "zh"
                   ? "先从左边选择一个课程或老师。"
                   : "Choose a course or teacher from the left first."}
@@ -239,10 +249,25 @@ export default function HomePage() {
         {selectedCommentsLoading ? (
           <div className="text-sm text-[var(--muted)]">{studentCopy.loadingActivity}</div>
         ) : selectedComments.length > 0 ? (
-          <CommentThread comments={selectedComments} compact onMutated={() => setRefreshNonce((current) => current + 1)} />
+          <div className="space-y-4">
+            <CommentThread
+              comments={showMoreRecentComments ? selectedComments.slice(0, 8) : selectedComments.slice(0, 4)}
+              compact
+              onMutated={() => setRefreshNonce((current) => current + 1)}
+            />
+            {!showMoreRecentComments && selectedComments.length > 4 ? (
+              <button
+                type="button"
+                onClick={() => setShowMoreRecentComments(true)}
+                className="inline-flex items-center rounded-full border border-[var(--border)] bg-white px-4 py-2 text-sm font-semibold transition hover:bg-[var(--surface-alt)]"
+              >
+                {locale === "zh" ? "显示更多" : "Show more"}
+              </button>
+            ) : null}
+          </div>
         ) : (
           <div className="text-sm text-[var(--muted)]">
-            {locale === "zh" ? "这个老师或课程下还没有热门评论。" : "There are no popular comments for this target yet."}
+            {locale === "zh" ? "这个老师或课程下还没有最新评论。" : "There are no recent comments for this target yet."}
           </div>
         )}
       </div>

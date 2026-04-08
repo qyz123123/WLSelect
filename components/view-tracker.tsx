@@ -17,8 +17,8 @@ export function ViewTracker({ viewerId }: { viewerId: string | null }) {
       visitorKey = readLocalStorage(STORAGE_KEY);
       if (!visitorKey) {
         visitorKey =
-          typeof crypto !== "undefined" && "randomUUID" in crypto
-            ? crypto.randomUUID()
+          typeof globalThis.crypto?.randomUUID === "function"
+            ? globalThis.crypto.randomUUID()
             : `viewer-${Math.random().toString(36).slice(2)}-${Date.now()}`;
         writeLocalStorage(STORAGE_KEY, visitorKey);
       }

@@ -1,7 +1,6 @@
 import { CourseRequestStatus, CourseSystem, Prisma, TargetType, UserRole, Visibility } from "@prisma/client";
 
 import { getShanghaiDayRange } from "@/lib/analytics-time";
-import { FIXED_ADMIN_ID, getFixedAdminUser } from "@/lib/fixed-admin";
 import { prisma } from "@/lib/prisma";
 import { buildTargetKey } from "@/lib/targets";
 import {
@@ -324,10 +323,6 @@ function canSeeComment(
 }
 
 export async function getCurrentUser(userId: string) {
-  if (userId === FIXED_ADMIN_ID) {
-    return getFixedAdminUser();
-  }
-
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: userProfileInclude

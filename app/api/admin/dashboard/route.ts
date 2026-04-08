@@ -3,7 +3,6 @@ import { UserRole } from "@prisma/client";
 
 import { auth } from "@/auth";
 import { getAdminDashboardData, getCurrentUser, getTeachers } from "@/lib/data";
-import { getFixedAdminUser } from "@/lib/fixed-admin";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
@@ -65,7 +64,7 @@ export async function GET() {
     ]);
 
     return NextResponse.json({
-      viewer: viewer ?? getFixedAdminUser(),
+      viewer,
       dashboard,
       teachers,
       courses,

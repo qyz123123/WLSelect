@@ -4,7 +4,6 @@ import { compare } from "bcryptjs";
 import { z } from "zod";
 import { UserRole } from "@prisma/client";
 
-import { FIXED_ADMIN_EMAIL, FIXED_ADMIN_ID, FIXED_ADMIN_PASSWORD } from "@/lib/fixed-admin";
 import { prisma } from "@/lib/prisma";
 
 const accountCredentialsSchema = z.object({
@@ -91,22 +90,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!parsed.success) {
           return null;
-        }
-
-        if (
-          parsed.data.expectedRole === "admin" &&
-          parsed.data.email === FIXED_ADMIN_EMAIL &&
-          parsed.data.password === FIXED_ADMIN_PASSWORD
-        ) {
-          return {
-            id: FIXED_ADMIN_ID,
-            email: FIXED_ADMIN_EMAIL,
-            name: "Admin",
-            image: `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent("Admin")}`,
-            role: "admin" as const,
-            language: "zh" as const,
-            teacherVerified: false
-          };
         }
 
         const user = await prisma.user.findUnique({

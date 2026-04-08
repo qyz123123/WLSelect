@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 
 import { auth } from "@/auth";
-import { isFixedAdminId } from "@/lib/fixed-admin";
 import { prisma } from "@/lib/prisma";
 
 export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -31,15 +30,13 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
       where: { id: teacher.userId }
     });
 
-    if (!isFixedAdminId(session.user.id)) {
-      await prisma.moderationLog.create({
-        data: {
-          moderatorId: session.user.id,
-          action: "REMOVE",
-          details: `Deleted teacher ${teacher.displayName}.`
-        }
-      });
-    }
+    await prisma.moderationLog.create({
+      data: {
+        moderatorId: session.user.id,
+        action: "REMOVE",
+        details: `Deleted teacher ${teacher.displayName}.`
+      }
+    });
 
     revalidatePath("/admin");
     revalidatePath("/teachers");

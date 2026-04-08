@@ -3,7 +3,6 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { auth } from "@/auth";
-import { isFixedAdminId } from "@/lib/fixed-admin";
 import { mergeTeachers } from "@/lib/admin-merge";
 import { prisma } from "@/lib/prisma";
 
@@ -44,15 +43,13 @@ export async function POST(request: Request) {
 
     await prisma.$transaction(async (tx) => {
       await mergeTeachers(tx, source.id, target.id);
-      if (!isFixedAdminId(session.user.id)) {
-        await tx.moderationLog.create({
-          data: {
-            moderatorId: session.user.id,
-            action: "REMOVE",
-            details: `Merged teacher ${source.displayName} into ${target.displayName}.`
-          }
-        });
-      }
+      await tx.moderationLog.create({
+        data: {
+          moderatorId: session.user.id,
+          action: "REMOVE",
+          details: `Merged teacher ${source.displayName} into ${target.displayName}.`
+        }
+      });
     });
 
     revalidatePath("/admin");

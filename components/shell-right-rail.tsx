@@ -11,7 +11,7 @@ export function ShellRightRail() {
   const variant = pathname === "/" ? "no-trending" : "full";
 
   return (
-    <div className={pathname === "/" ? "hidden xl:block" : "block"}>
+    <div className={pathname === "/" ? "hidden xl:block 2xl:w-full" : "block 2xl:w-full"}>
       <RightRail teachers={teachers} courses={courses} notifications={notifications} user={viewer} variant={variant} />
     </div>
   );

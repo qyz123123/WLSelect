@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
+import { readLocalStorage, writeLocalStorage } from "@/lib/browser-storage";
+
 const STORAGE_KEY = "wlselect-visitor-key";
 
 export function ViewTracker({ viewerId }: { viewerId: string | null }) {
@@ -12,10 +14,13 @@ export function ViewTracker({ viewerId }: { viewerId: string | null }) {
     let visitorKey = viewerId;
 
     if (!visitorKey) {
-      visitorKey = window.localStorage.getItem(STORAGE_KEY);
+      visitorKey = readLocalStorage(STORAGE_KEY);
       if (!visitorKey) {
-        visitorKey = crypto.randomUUID();
-        window.localStorage.setItem(STORAGE_KEY, visitorKey);
+        visitorKey =
+          typeof crypto !== "undefined" && "randomUUID" in crypto
+            ? crypto.randomUUID()
+            : `viewer-${Math.random().toString(36).slice(2)}-${Date.now()}`;
+        writeLocalStorage(STORAGE_KEY, visitorKey);
       }
     }
 

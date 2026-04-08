@@ -2,6 +2,7 @@
 
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
 
+import { readLocalStorage, writeLocalStorage } from "@/lib/browser-storage";
 import { defaultLocale, t } from "@/lib/i18n";
 import { Locale } from "@/lib/types";
 
@@ -25,7 +26,7 @@ export function LocaleProvider({
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
   useEffect(() => {
-    const storedLocale = window.localStorage.getItem("wlselect-locale") as Locale | null;
+    const storedLocale = readLocalStorage("wlselect-locale") as Locale | null;
     if (!persistToAccount && (storedLocale === "en" || storedLocale === "zh")) {
       setLocaleState(storedLocale);
     }
@@ -36,7 +37,7 @@ export function LocaleProvider({
       locale,
       setLocale: async (nextLocale: Locale) => {
         setLocaleState(nextLocale);
-        window.localStorage.setItem("wlselect-locale", nextLocale);
+        writeLocalStorage("wlselect-locale", nextLocale);
         if (persistToAccount) {
           await fetch("/api/preferences/language", {
             method: "POST",

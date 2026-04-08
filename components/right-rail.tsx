@@ -257,9 +257,9 @@ export function RightRail({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 2xl:space-y-5">
       {variant === "no-trending" ? null : (
-        <section className="card-surface rounded-[28px] p-4">
+        <section className="card-surface rounded-[28px] p-4 2xl:p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-semibold">{copy.trending}</h2>
             <span className="text-xs text-[var(--muted)]">{copy.starred}</span>
@@ -269,7 +269,7 @@ export function RightRail({
               ? "老师和课程都按综合评分与星标数排序。"
               : "Teachers and courses are both ranked by comprehensive score and stars."}
           </p>
-          <div className="space-y-3">
+          <div className="space-y-3 2xl:space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-3">
                 <div className="text-sm font-semibold text-[var(--muted)]">老师榜</div>
@@ -297,7 +297,7 @@ export function RightRail({
                       router.push(`/teachers/${teacher.id}`);
                     }
                   }}
-                  className="cursor-pointer rounded-2xl bg-[var(--surface-alt)] px-3 py-2.5 transition hover:bg-[var(--primary-soft)]"
+                  className="cursor-pointer rounded-2xl bg-[var(--surface-alt)] px-3 py-2.5 transition hover:bg-[var(--primary-soft)] 2xl:px-4 2xl:py-3"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <Link href={`/teachers/${teacher.id}`} className="flex min-w-0 items-center gap-3">
@@ -371,7 +371,7 @@ export function RightRail({
                       router.push(`/courses/${course.slug}`);
                     }
                   }}
-                  className="cursor-pointer rounded-2xl bg-[var(--surface-alt)] px-3 py-2.5 transition hover:bg-[var(--primary-soft)]"
+                  className="cursor-pointer rounded-2xl bg-[var(--surface-alt)] px-3 py-2.5 transition hover:bg-[var(--primary-soft)] 2xl:px-4 2xl:py-3"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <Link href={`/courses/${course.slug}`} className="flex min-w-0 items-center gap-3">

@@ -36,10 +36,10 @@ export function AppShell({
             <IdentityGate viewer={viewer}>
               <ViewTracker viewerId={viewer?.id ?? null} />
               <Topbar user={viewer} unreadNotifications={unreadNotifications} />
-              <div className="mx-auto grid max-w-[1480px] gap-6 px-4 pb-8 xl:grid-cols-[280px_minmax(0,1fr)] 2xl:grid-cols-[280px_minmax(0,1fr)_320px] lg:px-6">
+              <div className="mx-auto grid max-w-[1560px] gap-6 px-4 pb-8 xl:grid-cols-[280px_minmax(0,1fr)] 2xl:grid-cols-[280px_minmax(0,1fr)_380px] lg:px-6">
                 <Sidebar viewer={viewer} />
                 <main className="min-w-0">{children}</main>
-                <div className="xl:col-start-2 2xl:col-start-auto">
+                <div className="min-w-0 xl:col-start-2 2xl:col-start-auto 2xl:w-[380px]">
                   <ShellRightRail />
                 </div>
               </div>

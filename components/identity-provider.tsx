@@ -2,6 +2,7 @@
 
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
+import { readLocalStorage, removeLocalStorage, writeLocalStorage } from "@/lib/browser-storage";
 import { isGuestNameAllowed } from "@/lib/guest-name";
 import { writeGuestIdentityCookie } from "@/lib/identity-cookie-client";
 import { AppUser, IdentityState } from "@/lib/types";
@@ -59,7 +60,7 @@ export function IdentityProvider({
       return;
     }
 
-    const stored = window.localStorage.getItem(STORAGE_KEY);
+    const stored = readLocalStorage(STORAGE_KEY);
 
     if (stored) {
       try {
@@ -81,7 +82,7 @@ export function IdentityProvider({
           guestKey: guestDisplayName ? parsed.guestKey : undefined
         });
       } catch {
-        window.localStorage.removeItem(STORAGE_KEY);
+        removeLocalStorage(STORAGE_KEY);
       }
     }
 
@@ -96,12 +97,12 @@ export function IdentityProvider({
 
     if (!identity.selectedRole) {
       writeGuestIdentityCookie(undefined);
-      window.localStorage.removeItem(STORAGE_KEY);
+      removeLocalStorage(STORAGE_KEY);
       return;
     }
 
     writeGuestIdentityCookie(identity.selectedRole === "student" ? identity.guestKey : undefined);
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(identity));
+    writeLocalStorage(STORAGE_KEY, JSON.stringify(identity));
   }, [hydrated, identity, viewer]);
 
   const selectTeacher = useCallback(
@@ -136,7 +137,7 @@ export function IdentityProvider({
   );
 
   const clearIdentity = useCallback(() => {
-    window.localStorage.removeItem(STORAGE_KEY);
+    removeLocalStorage(STORAGE_KEY);
     setIdentity({
       selectedRole: null,
       status: null

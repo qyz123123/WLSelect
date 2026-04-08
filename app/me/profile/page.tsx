@@ -7,16 +7,18 @@ import { Card } from "@/components/card";
 import { useLocale } from "@/components/locale-provider";
 import { RoleBadge } from "@/components/role-badge";
 import { SectionHeading } from "@/components/section-heading";
+import { useViewer } from "@/components/viewer-provider";
 import { useApiData } from "@/hooks/use-api-data";
 import { AppUser, StudentProfile, TeacherProfile } from "@/lib/types";
 
 export default function ProfilePage() {
   const { copy, locale } = useLocale();
+  const viewer = useViewer();
   const { data, loading, error } = useApiData<{
     user: AppUser | null;
     profile: StudentProfile | null;
     teacherProfile: TeacherProfile | null;
-  }>("/api/me");
+  }>("/api/me", { enabled: Boolean(viewer) });
   const coursesData = useApiData<{
     items: Array<{ name: string }>;
   }>("/api/courses");
@@ -111,11 +113,11 @@ export default function ProfilePage() {
     }
   }
 
-  if (loading) {
+  if (viewer && loading) {
     return <Card>{copy.loadingProfile}</Card>;
   }
 
-  if (error || !user) {
+  if (!viewer || error || !user) {
     const displayError = error === "Unauthorized." || !user ? "请先登录" : error;
     return <Card>{displayError}</Card>;
   }

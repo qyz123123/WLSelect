@@ -79,74 +79,6 @@ function mapTargetType(targetType: TargetType): "teacher" | "course" {
   return targetType === TargetType.TEACHER ? "teacher" : "course";
 }
 
-async function getCourseCommentCountMap(courseIds: string[]) {
-  if (courseIds.length === 0) {
-    return new Map<string, number>();
-  }
-
-  const comments = await prisma.comment.findMany({
-    where: {
-      courseId: {
-        in: courseIds
-      }
-    },
-    select: {
-      courseId: true,
-      _count: {
-        select: {
-          replies: true
-        }
-      }
-    }
-  });
-
-  const commentCountMap = new Map<string, number>();
-
-  for (const comment of comments) {
-    if (!comment.courseId) {
-      continue;
-    }
-
-    commentCountMap.set(comment.courseId, (commentCountMap.get(comment.courseId) ?? 0) + 1 + comment._count.replies);
-  }
-
-  return commentCountMap;
-}
-
-async function getTeacherCommentCountMap(teacherIds: string[]) {
-  if (teacherIds.length === 0) {
-    return new Map<string, number>();
-  }
-
-  const comments = await prisma.comment.findMany({
-    where: {
-      teacherProfileId: {
-        in: teacherIds
-      }
-    },
-    select: {
-      teacherProfileId: true,
-      _count: {
-        select: {
-          replies: true
-        }
-      }
-    }
-  });
-
-  const commentCountMap = new Map<string, number>();
-
-  for (const comment of comments) {
-    if (!comment.teacherProfileId) {
-      continue;
-    }
-
-    commentCountMap.set(comment.teacherProfileId, (commentCountMap.get(comment.teacherProfileId) ?? 0) + 1 + comment._count.replies);
-  }
-
-  return commentCountMap;
-}
-
 function buildInteractionTargetMeta({
   interactionKind,
   interactionId,
@@ -353,8 +285,6 @@ export async function getTeachers(viewerId?: string, guestKey?: string) {
     },
     orderBy: [{ favorites: { _count: "desc" } }, { displayName: "asc" }]
   });
-  const commentCountMap = await getTeacherCommentCountMap(teachers.map((teacher) => teacher.id));
-
   return teachers.map<TeacherProfile>((teacher) => ({
     id: teacher.id,
     userId: teacher.userId,
@@ -371,7 +301,7 @@ export async function getTeachers(viewerId?: string, guestKey?: string) {
     })),
     avatar: teacher.avatarUrl ?? resolveAvatar(teacher.user),
     stars: teacher._count.favorites,
-    commentCount: commentCountMap.get(teacher.id) ?? 0,
+    commentCount: teacher.commentCount,
     ratings: mapRatings(teacher.ratings),
     isFavorite: favorites.has(buildTargetKey(TargetType.TEACHER, teacher.id))
   }));
@@ -404,8 +334,6 @@ export async function getTeacherById(id: string, viewerId?: string, guestKey?: s
     return null;
   }
 
-  const commentCountMap = await getTeacherCommentCountMap([teacher.id]);
-
   return {
     id: teacher.id,
     userId: teacher.userId,
@@ -422,7 +350,7 @@ export async function getTeacherById(id: string, viewerId?: string, guestKey?: s
     })),
     avatar: teacher.avatarUrl ?? resolveAvatar(teacher.user),
     stars: teacher._count.favorites,
-    commentCount: commentCountMap.get(teacher.id) ?? 0,
+    commentCount: teacher.commentCount,
     ratings: mapRatings(teacher.ratings),
     isFavorite: favorites.has(buildTargetKey(TargetType.TEACHER, teacher.id))
   } satisfies TeacherProfile;
@@ -448,8 +376,6 @@ export async function getCourses(viewerId?: string, guestKey?: string) {
     },
     orderBy: [{ favorites: { _count: "desc" } }, { code: "asc" }]
   });
-  const commentCountMap = await getCourseCommentCountMap(courses.map((course) => course.id));
-
   return courses.map<Course>((course) => ({
     id: course.id,
     slug: course.slug,
@@ -463,7 +389,7 @@ export async function getCourses(viewerId?: string, guestKey?: string) {
     teacherIds: course.teacherLinks.map((link) => link.teacher.id),
     teacherNames: course.teacherLinks.map((link) => link.teacher.displayName),
     stars: course._count.favorites,
-    commentCount: commentCountMap.get(course.id) ?? 0,
+    commentCount: course.commentCount,
     questionCount: course._count.questions,
     ratings: mapRatings(course.ratings),
     isFavorite: favorites.has(buildTargetKey(TargetType.COURSE, course.id))
@@ -495,8 +421,6 @@ export async function getCourseBySlug(slug: string, viewerId?: string, guestKey?
     return null;
   }
 
-  const commentCountMap = await getCourseCommentCountMap([course.id]);
-
   return {
     id: course.id,
     slug: course.slug,
@@ -510,7 +434,7 @@ export async function getCourseBySlug(slug: string, viewerId?: string, guestKey?
     teacherIds: course.teacherLinks.map((link) => link.teacher.id),
     teacherNames: course.teacherLinks.map((link) => link.teacher.displayName),
     stars: course._count.favorites,
-    commentCount: commentCountMap.get(course.id) ?? 0,
+    commentCount: course.commentCount,
     questionCount: course._count.questions,
     ratings: mapRatings(course.ratings),
     isFavorite: favorites.has(buildTargetKey(TargetType.COURSE, course.id))
@@ -1364,9 +1288,6 @@ export async function searchAll(query: string) {
       take: 10
     })
   ]);
-  const teacherCommentCountMap = await getTeacherCommentCountMap(teachers.map((teacher) => teacher.id));
-  const courseCommentCountMap = await getCourseCommentCountMap(courses.map((course) => course.id));
-
   return {
     teachers: teachers.map<TeacherProfile>((teacher) => ({
       id: teacher.id,
@@ -1384,7 +1305,7 @@ export async function searchAll(query: string) {
       })),
       avatar: teacher.avatarUrl ?? resolveAvatar(teacher.user),
       stars: teacher._count.favorites,
-      commentCount: teacherCommentCountMap.get(teacher.id) ?? 0,
+      commentCount: teacher.commentCount,
       ratings: mapRatings(teacher.ratings)
     })),
     courses: courses.map<Course>((course) => ({
@@ -1400,7 +1321,7 @@ export async function searchAll(query: string) {
       teacherIds: course.teacherLinks.map((link) => link.teacher.id),
       teacherNames: course.teacherLinks.map((link) => link.teacher.displayName),
       stars: course._count.favorites,
-      commentCount: courseCommentCountMap.get(course.id) ?? 0,
+      commentCount: course.commentCount,
       questionCount: course._count.questions,
       ratings: mapRatings(course.ratings)
     })),
@@ -1649,8 +1570,8 @@ export async function getTeacherDashboardData(userId: string): Promise<TeacherDa
   ];
 
   const commentCount =
-    teacher._count.comments +
-    teacher.courseLinks.reduce((sum, link) => sum + link.course._count.comments, 0);
+    teacher.commentCount +
+    teacher.courseLinks.reduce((sum, link) => sum + link.course.commentCount, 0);
   const questionCount =
     teacher._count.questions +
     teacher.courseLinks.reduce((sum, link) => sum + link.course._count.questions, 0);

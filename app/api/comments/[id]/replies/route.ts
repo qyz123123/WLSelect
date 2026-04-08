@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { auth } from "@/auth";
+import { syncCommentCounts } from "@/lib/comment-counts";
 import { ensureGuestNameAvailable, guestIdentitySchema } from "@/lib/guest";
 import { prisma } from "@/lib/prisma";
 import { getTargetDetailPath } from "@/lib/route-paths";
@@ -57,7 +58,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
   });
 
+  if (comment) {
+    await syncCommentCounts(prisma, {
+      teacherIds: comment.teacherProfileId ? [comment.teacherProfileId] : undefined,
+      courseIds: comment.courseId ? [comment.courseId] : undefined
+    });
+  }
+
   revalidatePath("/");
+  revalidatePath("/teachers");
+  revalidatePath("/courses");
   const detailPath = comment
     ? await getTargetDetailPath({
         targetType: comment.targetType,

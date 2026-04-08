@@ -2,12 +2,20 @@
 
 import { useEffect, useState } from "react";
 
-export function useApiData<T>(url: string) {
+export function useApiData<T>(url: string, options?: { enabled?: boolean }) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const enabled = options?.enabled ?? true;
 
   useEffect(() => {
+    if (!enabled) {
+      setData(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
     let active = true;
 
     async function load() {
@@ -45,7 +53,7 @@ export function useApiData<T>(url: string) {
     return () => {
       active = false;
     };
-  }, [url]);
+  }, [enabled, url]);
 
   return { data, loading, error, setData };
 }

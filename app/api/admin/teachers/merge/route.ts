@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { auth } from "@/auth";
 import { mergeTeachers } from "@/lib/admin-merge";
+import { syncCommentCounts } from "@/lib/comment-counts";
 import { prisma } from "@/lib/prisma";
 
 const schema = z.object({
@@ -43,6 +44,9 @@ export async function POST(request: Request) {
 
     await prisma.$transaction(async (tx) => {
       await mergeTeachers(tx, source.id, target.id);
+      await syncCommentCounts(tx, {
+        teacherIds: [target.id]
+      });
       await tx.moderationLog.create({
         data: {
           moderatorId: session.user.id,

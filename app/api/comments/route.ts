@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { auth } from "@/auth";
+import { syncCommentCounts } from "@/lib/comment-counts";
 import { ensureGuestNameAvailable, guestIdentitySchema } from "@/lib/guest";
 import { prisma } from "@/lib/prisma";
 import { getTargetDetailPath } from "@/lib/route-paths";
@@ -163,6 +164,11 @@ export async function POST(request: Request) {
       })
     )
   );
+
+  await syncCommentCounts(prisma, {
+    teacherIds: parsed.data.targetType === "teacher" ? [parsed.data.targetId] : undefined,
+    courseIds: parsed.data.targetType === "course" ? [parsed.data.targetId] : undefined
+  });
 
   revalidatePath("/");
   revalidatePath("/teachers");

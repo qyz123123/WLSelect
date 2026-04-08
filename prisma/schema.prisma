@@ -121,6 +121,7 @@ model TeacherProfile {
   displayName      String
   department       String
   subjectArea      String
+  commentCount     Int            @default(0)
   shortBio         String?
   teachingStyle    String?
   avatarUrl        String?
@@ -140,6 +141,7 @@ model Course {
   code           String               @unique
   name           String
   subject        String
+  commentCount   Int                  @default(0)
   description    String
   gradeLevels    GradeLevel[]
   system         CourseSystem

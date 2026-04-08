@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Card } from "@/components/card";
 import { useLocale } from "@/components/locale-provider";
@@ -21,6 +22,7 @@ type AdminCommentItem = {
 
 export default function AdminPage() {
   const { copy, locale } = useLocale();
+  const router = useRouter();
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [actionError, setActionError] = useState<string | null>(null);
   const [showAllTeachers, setShowAllTeachers] = useState(false);
@@ -218,6 +220,8 @@ export default function AdminPage() {
       teachers: data.teachers.filter((teacher) => teacher.id !== id),
       comments: data.comments.filter((comment) => !(comment.targetType === "teacher" && comment.targetLabel === name))
     });
+    setRefreshNonce((current) => current + 1);
+    router.refresh();
   }
 
   async function deleteCourse(id: string, name: string) {
@@ -244,6 +248,8 @@ export default function AdminPage() {
       courses: data.courses.filter((course) => course.id !== id),
       comments: data.comments.filter((comment) => !(comment.targetType === "course" && comment.targetLabel === name))
     });
+    setRefreshNonce((current) => current + 1);
+    router.refresh();
   }
 
   async function deleteComment(id: string) {
@@ -265,6 +271,8 @@ export default function AdminPage() {
       ...data,
       comments: data.comments.filter((comment) => comment.id !== id)
     });
+    setRefreshNonce((current) => current + 1);
+    router.refresh();
   }
 
   async function mergeTeacherRecords() {
@@ -310,6 +318,7 @@ export default function AdminPage() {
     setTeacherMergeSourceId("");
     setTeacherMergeTargetId("");
     setRefreshNonce((current) => current + 1);
+    router.refresh();
   }
 
   async function mergeCourseRecords() {
@@ -355,6 +364,7 @@ export default function AdminPage() {
     setCourseMergeSourceId("");
     setCourseMergeTargetId("");
     setRefreshNonce((current) => current + 1);
+    router.refresh();
   }
 
   if (loading) {

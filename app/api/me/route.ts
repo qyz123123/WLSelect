@@ -7,7 +7,14 @@ export async function GET() {
   const session = await auth();
 
   if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    return NextResponse.json({
+      user: null,
+      profile: null,
+      teacherProfile: null,
+      notifications: [],
+      comments: [],
+      questions: []
+    });
   }
 
   const user = await getCurrentUser(session.user.id);

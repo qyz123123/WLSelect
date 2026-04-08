@@ -5,30 +5,32 @@ import { CourseCard } from "@/components/course-card";
 import { TeacherCard } from "@/components/teacher-card";
 import { useLocale } from "@/components/locale-provider";
 import { SectionHeading } from "@/components/section-heading";
+import { useViewer } from "@/components/viewer-provider";
 import { useApiData } from "@/hooks/use-api-data";
 import { Course, StudentProfile, TeacherProfile } from "@/lib/types";
 
 export default function SavedPage() {
   const { copy } = useLocale();
+  const viewer = useViewer();
   const { data, loading, error } = useApiData<{
     profile: StudentProfile | null;
     user: { id: string } | null;
     comments: [];
     questions: [];
-  }>("/api/me");
+  }>("/api/me", { enabled: Boolean(viewer) });
   const teacherData = useApiData<{ items: TeacherProfile[] }>("/api/teachers");
   const courseData = useApiData<{ items: Course[] }>("/api/courses");
   const profile = data?.profile;
   const teachers = teacherData.data?.items.filter((teacher) => profile?.savedTeacherIds.includes(teacher.id)) ?? [];
   const courses = courseData.data?.items.filter((course) => profile?.savedCourseIds.includes(course.id)) ?? [];
-  const displayError = error === "Unauthorized." ? "请先登录" : error;
+  const displayError = !viewer ? "请先登录" : error === "Unauthorized." ? "请先登录" : error;
 
   return (
     <div className="space-y-6">
       <Card>
         <SectionHeading title={copy.saved} description={copy.savedDescription} />
       </Card>
-      {loading ? <Card>{copy.loadingSaved}</Card> : null}
+      {viewer && loading ? <Card>{copy.loadingSaved}</Card> : null}
       {displayError ? <Card>{displayError}</Card> : null}
       <div className="space-y-6">
         <section className="space-y-4">

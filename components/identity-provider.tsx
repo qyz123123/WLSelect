@@ -3,6 +3,7 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { readLocalStorage, removeLocalStorage, writeLocalStorage } from "@/lib/browser-storage";
+import { createClientId } from "@/lib/client-id";
 import { isGuestNameAllowed } from "@/lib/guest-name";
 import { writeGuestIdentityCookie } from "@/lib/identity-cookie-client";
 import { AppUser, IdentityState } from "@/lib/types";
@@ -21,11 +22,7 @@ interface IdentityContextValue {
 const IdentityContext = createContext<IdentityContextValue | null>(null);
 
 function createGuestKey() {
-  if (typeof globalThis.crypto?.randomUUID === "function") {
-    return globalThis.crypto.randomUUID();
-  }
-
-  return `guest-${Math.random().toString(36).slice(2)}-${Date.now()}`;
+  return createClientId("guest");
 }
 
 export function IdentityProvider({

@@ -56,7 +56,7 @@ export function Sidebar({ viewer }: { viewer: AppUser | null }) {
       </aside>
       <aside className="card-surface sticky top-6 hidden h-fit rounded-[28px] p-4 xl:block">
         <div className="mb-5 border-b border-[var(--border)] pb-4">
-          <Image src={logoLong} alt={copy.appName} className="h-auto w-[138px]" priority />
+          <Image src={logoLong} alt={copy.appName} className="h-auto w-[240px] max-w-full" priority />
           <p className="mt-1 text-sm text-[var(--muted)]">{locale === "zh" ? "你的声音，他人的选择" : copy.tagline}</p>
         </div>
         <nav className="space-y-1">

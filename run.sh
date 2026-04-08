@@ -28,4 +28,5 @@ then
 else
   echo "Existing database content detected. Skipping destructive seed/bootstrap steps."
 fi
+npm run comments:sync
 npm run dev
